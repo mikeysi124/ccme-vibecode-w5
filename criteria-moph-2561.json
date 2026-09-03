@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "id": "moph-ed-triage-2561",
+    "name": "MOPH ED Triage (กรมการแพทย์ 2561)",
+    "source": "กรมการแพทย์ กระทรวงสาธารณสุข. MOPH ED. TRIAGE. พิมพ์ครั้งที่ 1 (2561) — แปลมาจาก ESI (Emergency Severity Index) คัดกรอง 5 ระดับ ใช้ 4 หัวข้อเป็นจุดตัด",
+    "version": "2561",
+    "effective_date": "2018-01-01",
+    "transcribed_from": "capstone/refs/MOPH-ED-Triage-2561-krom-kan-phaet.pdf (24 หน้า) — ข้อความคัดจาก text layer ของเล่ม ซ่อมเฉพาะสระ/วรรณยุกต์ที่หลุดจากการฝังฟอนต์ (เช่น คาถาม → คำถาม) ไม่ได้เรียบเรียงใหม่",
+    "decision_points": {
+      "A": "จุด ก — ผู้ป่วยกำลังจะตายหรือไม่ (ต้องการ life-saving intervention) → ระดับ 1 (หน้า 8–9)",
+      "B": "จุด ข — ผู้ป่วยรอได้หรือไม่ 3 คำถาม: ภาวะเสี่ยง · ภาวะซึม · ภาวะปวด → ระดับ 2 (หน้า 10–12)",
+      "C": "จุด ค — ใช้ทรัพยากรมากแค่ไหน: 0 = ระดับ 5 · 1 = ระดับ 4 · ≥2 = ไปจุด ง (หน้า 13–15)",
+      "D": "จุด ง — สัญญาณชีพช่วงอันตรายตามช่วงอายุ ก่อนสรุประดับ 3 (หน้า 16)"
+    },
+    "channel_rule": "ระดับ 1–2 → ER · ระดับ 3–5 → OPD (ในเวลา) หรือแพทย์เวร (นอกเวลา) — กติกาช่องทางนี้มาจากหน้างานที่สัมภาษณ์ ไม่ได้อยู่ในคู่มือ",
+    "limits": "คู่มือระบุเองว่า \"ความถูกต้อง รวดเร็ว แม่นยำของระบบการคัดกรองนี้ขึ้นอยู่ประสบการณ์ของผู้คัดกรองเป็นอย่างสูง\" และจุด ข \"จำเป็นต้องใช้พื้นฐานของการซักประวัติและใช้สัมผัสที่หก จากประสบการณ์\" — เครื่องมือนี้จึงเสนอเท่านั้น พยาบาลตัดสินสุดท้ายเสมอ",
+    "not_transcribed": "ผัง ESI Algorithm Version 4 (หน้า 6) เป็นภาพ ไม่มี text layer — ยังไม่ได้ถอดความ",
+    "flag_labels": {
+          "cpr": "ต้องทำ CPR",
+          "et_tube": "ต้องใส่ท่อช่วยหายใจ",
+          "icd": "ต้องใส่สายระบายทรวงอก (ICD)",
+          "arrhythmia": "Life-threatening arrhythmia",
+          "seizure": "ชัก",
+          "apnea": "Apnea",
+          "acs_stable": "Active chest pain สงสัย ACS อาการคงที่",
+          "needle_stick": "บุคลากรโดนเข็มตำ",
+          "stroke_signs": "Signs of stroke (ไม่เข้าระดับ 1)",
+          "ectopic": "สงสัยท้องนอกมดลูก สัญญาณชีพคงที่",
+          "immunocompromised_fever": "ได้เคมีบำบัด/ภูมิคุ้มกันบกพร่อง มาด้วยไข้",
+          "suicidal": "เสี่ยงฆ่าตัวตาย / ทำร้ายผู้อื่น",
+          "high_risk_other": "ภาวะเสี่ยงอื่นจากการซักประวัติและประสบการณ์",
+          "new_onset_altered": "ซึม/สับสนที่เพิ่งเป็น (new onset)",
+          "pain_objective_signs": "มีลักษณะประกอบของความปวด (สีหน้า เหงื่อแตก ท่าทาง สัญญาณชีพเปลี่ยน)"
+    }
+  },
+
+  "resources": {
+    "note": "หลักการนับตามคู่มือหน้า 13–14 — กิจกรรมที่ซับซ้อน ใช้เวลา ใช้บุคลากรนอกห้องฉุกเฉิน ทำให้รอนานขึ้น จึงนับเป็นหนึ่งกิจกรรม",
+    "counted": [
+      { "id": "lab", "label": "Lab (เจาะเลือด, ตรวจปัสสาวะ)", "rule": "CBC, BUN/Cr, E'lyte, G/M ถือเป็นการเจาะเลือดทั้งหมด = 1 กิจกรรม · CBC + UA ถือว่าเป็น Lab = 1 กิจกรรม" },
+      { "id": "ekg", "label": "EKG" },
+      { "id": "xray", "label": "X-ray", "rule": "CXR, Skull film, C-spine ถือว่าเป็น x-ray เหมือนกัน = 1 กิจกรรม" },
+      { "id": "us", "label": "Ultrasound" },
+      { "id": "ct", "label": "CT scan", "rule": "CXR + CT scan = 2 กิจกรรม" },
+      { "id": "iv_fluid", "label": "IV fluid (hydration)" },
+      { "id": "injection", "label": "ฉีดยา IV, IM หรือพ่นยา" },
+      { "id": "consult", "label": "Consult เฉพาะทาง" },
+      { "id": "procedure", "label": "หัตถการ NG, foley's, เย็บแผล, eye irrigation, remove FB, I&D, เช็ดตัวลดไข้" }
+    ],
+    "not_counted": [
+      { "id": "hp", "label": "การซักประวัติและตรวจร่างกาย (History & Physical)" },
+      { "id": "heparin_lock", "label": "On heparin lock" },
+      { "id": "oral_scheduled", "label": "ยากิน, ยาฉีดตามนัด" },
+      { "id": "tt_tat", "label": "ฉีด tetanus toxoid (TT), TAT" },
+      { "id": "rabies", "label": "ฉีด rabies vaccine (Verorab, Speeda, PCEC), ERIG, HRIG" },
+      { "id": "splint", "label": "Splint, sling, ล้างแผล/dressing, cold pack" },
+      { "id": "call_doctor", "label": "โทรตามแพทย์เวร" }
+    ]
+  },
+
+  "criteria": [
+    { "code": "A1", "dp": "A", "level": 1, "text": "ต้องทำ CPR", "page": 8, "test": { "flag": "cpr" } },
+    { "code": "A2", "dp": "A", "level": 1, "text": "ต้องใส่ท่อช่วยหายใจ (ET tube)", "page": 8, "test": { "flag": "et_tube" } },
+    { "code": "A3", "dp": "A", "level": 1, "text": "ต้องใส่สายระบายทรวงอก (ICD)", "page": 8, "test": { "flag": "icd" } },
+    { "code": "A4", "dp": "A", "level": 1, "text": "GCS ≤ 8", "page": 8, "test": { "field": "gcs", "lte": 8 } },
+    { "code": "A5", "dp": "A", "level": 1, "text": "O₂ sat < 90", "page": 8, "test": { "field": "spo2", "lt": 90 } },
+    { "code": "A6", "dp": "A", "level": 1, "text": "Life-threatening arrhythmia", "page": 8, "test": { "flag": "arrhythmia" } },
+    { "code": "A7", "dp": "A", "level": 1, "text": "Shock — SBP < 90", "page": 8, "test": { "field": "sbp", "lt": 90 } },
+    { "code": "A8", "dp": "A", "level": 1, "text": "Shock — MAP < 60", "page": 8, "test": { "field": "map", "lt": 60 } },
+    { "code": "A9", "dp": "A", "level": 1, "text": "ชัก", "page": 8, "test": { "flag": "seizure" } },
+    { "code": "A10", "dp": "A", "level": 1, "text": "Apnea", "page": 8, "test": { "flag": "apnea" } },
+
+    { "code": "B1", "dp": "B", "level": 2, "group": "ภาวะเสี่ยง", "text": "Active chest pain สงสัยเส้นเลือดหัวใจตีบ อาการคงที่ ไม่ต้องการเครื่องมือช่วยชีวิตทันที", "page": 11, "test": { "flag": "acs_stable" } },
+    { "code": "B2", "dp": "B", "level": 2, "group": "ภาวะเสี่ยง", "text": "บุคลากรทางการแพทย์ที่โดนเข็มตำ (needle stick)", "page": 11, "test": { "flag": "needle_stick" } },
+    { "code": "B3", "dp": "B", "level": 2, "group": "ภาวะเสี่ยง", "text": "Signs of a stroke ที่ไม่เข้าตามข้อบ่งชี้ระดับ 1", "page": 11, "test": { "flag": "stroke_signs" } },
+    { "code": "B4", "dp": "B", "level": 2, "group": "ภาวะเสี่ยง", "text": "สงสัยท้องนอกมดลูก (r/o ectopic pregnancy) สัญญาณชีพคงที่", "page": 11, "test": { "flag": "ectopic" } },
+    { "code": "B5", "dp": "B", "level": 2, "group": "ภาวะเสี่ยง", "text": "ผู้ป่วยที่รับยาเคมีบำบัด/ภูมิคุ้มกันบกพร่อง มาด้วยไข้", "page": 11, "test": { "flag": "immunocompromised_fever" } },
+    { "code": "B6", "dp": "B", "level": 2, "group": "ภาวะเสี่ยง", "text": "ผู้ป่วยที่เสี่ยงต่อการฆ่าตัวตายหรือทำร้ายผู้อื่น (suicidal / homicidal)", "page": 11, "test": { "flag": "suicidal" } },
+    { "code": "B7", "dp": "B", "level": 2, "group": "ภาวะเสี่ยง", "text": "ภาวะเสี่ยงอื่นจากการซักประวัติและประสบการณ์ผู้คัดกรอง — คู่มือระบุว่า \"จำเป็นต้องใช้พื้นฐานของการซักประวัติและใช้สัมผัสที่หก จากประสบการณ์\" และแต่ละโรงพยาบาลนิยามเพิ่มเองได้", "page": 10, "nurse_judgment": true, "test": { "flag": "high_risk_other" } },
+
+    { "code": "B8", "dp": "B", "level": 2, "group": "ภาวะซึม", "text": "GCS 9–12", "page": 12, "test": { "all": [ { "field": "gcs", "gte": 9 }, { "field": "gcs", "lte": 12 } ] } },
+    { "code": "B9", "dp": "B", "level": 2, "group": "ภาวะซึม", "text": "New onset alteration of conscious / confusion / lethargy (เช่น ผู้สูงอายุสับสนที่เพิ่งเป็น, เด็ก 3 เดือนนอนทั้งวัน, วัยรุ่นสับสนถามตอบไม่รู้เรื่อง)", "page": 12, "test": { "flag": "new_onset_altered" } },
+
+    { "code": "B10", "dp": "B", "level": 2, "group": "ภาวะปวด", "text": "ปวดมาก pain score ≥ 7 ร่วมกับการประเมินจากลักษณะ (สีหน้า เหงื่อแตก ท่าทาง การเปลี่ยนแปลงของสัญญาณชีพ) โดยสัมพันธ์กับอวัยวะสำคัญอย่างสมเหตุสมผล", "page": 12, "test": { "all": [ { "field": "pain_score", "gte": 7 }, { "flag": "pain_objective_signs" } ] } },
+
+    { "code": "D1", "dp": "D", "level": 2, "danger_zone": true, "text": "อายุ < 3 เดือน: ชีพจร > 180 ครั้ง/นาที", "page": 16, "note": "ตารางในคู่มือพิมพ์ \"180\" โดยไม่มีเครื่องหมาย > ต่างจากช่วงอายุอื่น — ตีความเป็น > 180 ให้สอดคล้องกับทั้งตาราง", "test": { "all": [ { "field": "age_months", "lt": 3 }, { "field": "hr", "gt": 180 } ] } },
+    { "code": "D2", "dp": "D", "level": 2, "danger_zone": true, "text": "อายุ < 3 เดือน: อัตราการหายใจ > 50 ครั้ง/นาที", "page": 16, "test": { "all": [ { "field": "age_months", "lt": 3 }, { "field": "rr", "gt": 50 } ] } },
+    { "code": "D3", "dp": "D", "level": 2, "danger_zone": true, "text": "อายุ 3 เดือน – 3 ปี: ชีพจร > 160 ครั้ง/นาที", "page": 16, "test": { "all": [ { "field": "age_months", "gte": 3 }, { "field": "age_months", "lt": 36 }, { "field": "hr", "gt": 160 } ] } },
+    { "code": "D4", "dp": "D", "level": 2, "danger_zone": true, "text": "อายุ 3 เดือน – 3 ปี: อัตราการหายใจ > 40 ครั้ง/นาที", "page": 16, "test": { "all": [ { "field": "age_months", "gte": 3 }, { "field": "age_months", "lt": 36 }, { "field": "rr", "gt": 40 } ] } },
+    { "code": "D5", "dp": "D", "level": 2, "danger_zone": true, "text": "อายุ 3–8 ปี: ชีพจร > 140 ครั้ง/นาที", "page": 16, "test": { "all": [ { "field": "age_months", "gte": 36 }, { "field": "age_months", "lte": 96 }, { "field": "hr", "gt": 140 } ] } },
+    { "code": "D6", "dp": "D", "level": 2, "danger_zone": true, "text": "อายุ 3–8 ปี: อัตราการหายใจ > 30 ครั้ง/นาที", "page": 16, "test": { "all": [ { "field": "age_months", "gte": 36 }, { "field": "age_months", "lte": 96 }, { "field": "rr", "gt": 30 } ] } },
+    { "code": "D7", "dp": "D", "level": 2, "danger_zone": true, "text": "อายุ > 8 ปี: ชีพจร > 100 ครั้ง/นาที", "page": 16, "test": { "all": [ { "field": "age_months", "gt": 96 }, { "field": "hr", "gt": 100 } ] } },
+    { "code": "D8", "dp": "D", "level": 2, "danger_zone": true, "text": "อายุ > 8 ปี: อัตราการหายใจ > 20 ครั้ง/นาที", "page": 16, "test": { "all": [ { "field": "age_months", "gt": 96 }, { "field": "rr", "gt": 20 } ] } },
+    { "code": "D9", "dp": "D", "level": 2, "danger_zone": true, "text": "SpO₂ < 92% (ทุกช่วงอายุ)", "page": 16, "test": { "field": "spo2", "lt": 92 } },
+    { "code": "D10", "dp": "D", "level": 2, "danger_zone": true, "nurse_judgment": true, "text": "อายุ < 3 ปี ให้ใช้อุณหภูมิร่วมด้วยในการตัดสินใจ — คู่มือไม่ได้ระบุจุดตัดของอุณหภูมิไว้ ระบบจึงยกให้พยาบาลพิจารณา ไม่ตัดสินแทน", "page": 16, "advisory_only": true, "test": { "field": "age_months", "lt": 36 } }
+  ]
+}

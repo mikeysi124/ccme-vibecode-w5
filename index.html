@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clinical App Mini-Project — P49 นพ.กิตติพศ เกียรติพัฒนาชัย</title>
+<style>
+  :root{--blue:#0f4c81;--ink:#1b2430;--muted:#5b6b7c;--line:#c9d3dd;--bg:#f4f7fa;--infobg:#e8f1fa}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Sukhumvit Set","Thonburi","Helvetica Neue",Arial,sans-serif;font-size:17px;line-height:1.55}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 14px 60px}
+  h1{font-size:23px;color:var(--blue);margin:8px 0 4px}
+  .lead{color:var(--muted);font-size:15px;margin:0 0 18px}
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  .card h2{font-size:18px;color:var(--blue);margin:0 0 6px}
+  a.btn{display:block;text-align:center;background:var(--blue);color:#fff;text-decoration:none;
+    font-weight:700;font-size:19px;padding:16px;border-radius:12px;margin-top:10px}
+  a.btn.sec{background:#fff;color:var(--blue);border:2px solid var(--blue);font-size:16px;padding:13px}
+  ul{margin:6px 0 0;padding-left:20px} li{margin-bottom:5px;font-size:16px}
+  .kv{font-size:15px;color:var(--muted);margin:3px 0}
+  .kv b{color:var(--ink)}
+  .disc{font-size:13px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin-top:12px}
+  code{font-family:"SF Mono",Menlo,monospace;font-size:14px;background:var(--infobg);
+    padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Clinical App Mini-Project — ผู้ช่วยคัดกรองช่องทาง ER/OPD</h1>
+  <p class="lead">
+    Workshop on Vibe Coding for Clinical Innovation 2026 · ศูนย์การศึกษาต่อเนื่องของแพทย์ (ศ.น.พ.)<br>
+    วิชา 4 Vibe Coding &amp; Low-Code Fundamentals · <b>นพ.กิตติพศ เกียรติพัฒนาชัย · User Code P49</b>
+  </p>
+
+  <div class="card">
+    <h2>เปิดใช้งานระบบ</h2>
+    <p class="kv">เว็บแอปทำงานได้จริงบนมือถือ/แท็บเล็ต ไม่ต้องติดตั้งอะไร</p>
+    <a class="btn" href="P49-triage.html">▶ เปิดแอปคัดกรอง ER/OPD</a>
+    <a class="btn sec" href="P49-triage.html#test">ดูผลชุดทดสอบในแอป (แท็บ “ทดสอบ”) — 29 เคส</a>
+  </div>
+
+  <div class="card">
+    <h2>ปัญหาที่แก้ (ต่อเนื่องจาก Problem Statement วิชา 3)</h2>
+    <p>พยาบาลคัดกรองหน้าห้องฉุกเฉินต้องจัดระดับความเร่งด่วน 1–5 ภายในไม่กี่นาที โดยเทียบเกณฑ์ราว 50 ข้อจากความจำ
+      และ<b>ระดับที่ให้กำหนดช่องทาง ER หรือ OPD โดยอัตโนมัติ</b> เคสก้ำกึ่งที่<b>รอยต่อระดับ 2/3</b>
+      จึงมักถูกดันขึ้นเพื่อความปลอดภัย ทำให้ผู้ป่วยที่ควรไป OPD ไหลเข้า ER</p>
+    <p>ระบบนี้เสนอระดับและช่องทาง พร้อม<b>แสดงข้อเกณฑ์ที่เข้า/ไม่เข้าเป็นรายข้อ</b>
+      โดยพยาบาลเป็นผู้ตัดสินสุดท้ายเสมอและ override ได้ทุกครั้ง</p>
+  </div>
+
+  <div class="card">
+    <h2>ฟีเจอร์ที่ทำงานจริง</h2>
+    <ul>
+      <li><b>รับข้อมูลแบบแตะเลือก</b> — อาการนำ · อายุ (ปี/เดือน) · GCS · สัญญาณชีพ · pain score
+          พร้อมตรวจค่าที่เป็นไปไม่ได้ (เช่น ชีพจร 400) ก่อนประเมิน</li>
+      <li><b>Criteria engine เดินตาม 4 จุดตัดสินใจ ก–ง</b> ของคู่มือ MOPH ED Triage 2561
+          ผลลัพธ์ deterministic — ใส่ข้อมูลเดิมได้คำตอบเดิมเสมอ ไม่มีการสุ่ม ไม่เรียก AI</li>
+      <li><b>อ้างเกณฑ์รายข้อพร้อมเลขหน้าคู่มือ</b> และแยกให้เห็น 3 กลุ่ม:
+          เข้าเกณฑ์ · ตัดสินไม่ได้เพราะข้อมูลไม่ครบ · ไม่เข้าเกณฑ์</li>
+      <li><b>สลับชุดเกณฑ์ได้โดยไม่แก้โค้ด</b> — มีให้เลือก 2 ชุด (ฉบับคู่มือ และฉบับโรงพยาบาลที่ใช้จุดตัดตามอายุ)
+          หรือโหลดไฟล์ <code>.json</code> ของโรงพยาบาลเองเข้ามา</li>
+      <li><b>ยืนยัน / override พร้อมเหตุผล</b> → เกิด audit trail และสรุปอัตราการแก้ระดับ (ดันขึ้น/ลดลง)</li>
+      <li><b>ตารางเคส + ส่งออก CSV</b> (UTF-8 BOM เปิดใน Excel ภาษาไทยไม่เพี้ยน)</li>
+      <li><b>Known-Answer Test ในตัว 29 เคส</b> — รวมตัวอย่างที่คู่มือเฉลยไว้เอง</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>ที่มาของเกณฑ์</h2>
+    <p class="kv"><b>ชุดหลัก:</b> กรมการแพทย์ กระทรวงสาธารณสุข. MOPH ED. TRIAGE. พิมพ์ครั้งที่ 1 (2561)
+      — แปลจาก ESI ใช้ 4 หัวข้อเป็นจุดตัด (ถอดความจาก text layer ของเล่ม พร้อมเลขหน้ากำกับทุกข้อ)</p>
+    <p class="kv"><b>ชุดฉบับโรงพยาบาล:</b> ชุดหลัก + จุดตัดตามอายุจาก วิธีปฏิบัติ PMK-WND-037
+      การคัดกรองผู้ป่วยนอก รพ.พระมงกุฎเกล้า (2561) — ระบุที่มารายข้อในแอป</p>
+    <p class="kv"><b>เหตุผลที่ต้องมี 2 ชุด:</b> คู่มือ MOPH ใช้เกณฑ์ shock <code>SBP &lt; 90</code> เท่ากันทุกช่วงอายุ
+      ถ้าใช้ตรงตัวกับทารกจะได้ระดับ 1 แทบทุกราย — แอปแสดงผลตามที่คู่มือเขียนโดยไม่แก้ให้เอง
+      แต่เปิดให้สลับไปใช้ชุดที่มีจุดตัดตามอายุได้ (ดูเคส 20b เทียบ 20c ในแท็บทดสอบ)</p>
+  </div>
+
+  <div class="card">
+    <h2>ไฟล์ในโปรเจกต์</h2>
+    <ul>
+      <li><code>P49-triage.html</code> — ตัวแอป</li>
+      <li><code>engine.js</code> — criteria engine (ไม่มีเกณฑ์ฝังอยู่เลย รับเกณฑ์เป็นข้อมูล)</li>
+      <li><code>criteria-moph-2561.json</code> · <code>criteria-moph-2561-local.json</code> — ชุดเกณฑ์</li>
+      <li><code>kat-cases.js</code> — ชุดทดสอบ 29 เคส (ใช้ร่วมกันทั้งในแอปและใน <code>node test-engine.js</code>)</li>
+      <li><code>test-engine.js</code> — ชุดตรวจ 58 ข้อ รันด้วย Node</li>
+    </ul>
+    <a class="btn sec" href="https://github.com/mikeysi124/ccme-vibecode-w5">ดู source code บน GitHub</a>
+  </div>
+
+  <p class="disc">
+    ⚠️ เครื่องมือสาธิตเพื่อการเรียนการสอนเท่านั้น ใช้สถานการณ์จำลองทั้งหมด ไม่มีข้อมูลผู้ป่วยจริง
+    ไม่เก็บชื่อ / HN / เลขบัตรประชาชน · ไม่ใช่เครื่องมือแพทย์ ยังไม่ผ่านการตรวจสอบความแม่นยำทางคลินิก
+    และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · ข้อมูลที่บันทึกอยู่ใน localStorage ของเบราว์เซอร์เครื่องผู้ใช้เท่านั้น
+  </p>
+</div>
+</body>
+</html>

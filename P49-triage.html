@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ผู้ช่วยคัดกรองช่องทาง ER/OPD — อ้างอิงเกณฑ์รายข้อ</title>
+<style>
+  :root{--blue:#0f4c81;--ink:#1b2430;--muted:#5b6b7c;--line:#c9d3dd;--bg:#f4f7fa;
+        --ok:#1e7d3a;--warn:#9a5b00;--bad:#b42318;--okbg:#e6f4ea;--warnbg:#fff1cc;
+        --badbg:#fde8e6;--infobg:#e8f1fa}
+  *{box-sizing:border-box}
+  html,body{margin:0;overflow-x:hidden;background:var(--bg);color:var(--ink);
+    font-family:"Sukhumvit Set","Thonburi","Helvetica Neue",Arial,sans-serif;font-size:18px;line-height:1.45}
+  .app{max-width:560px;margin:0 auto;padding:12px 12px 90px}
+  header h1{font-size:21px;margin:6px 0 2px;color:var(--blue)}
+  header p{margin:0 0 10px;color:var(--muted);font-size:14px}
+  .tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:12px}
+  .tabs button{min-height:52px;border:2px solid var(--line);background:#fff;border-radius:10px;
+    font:inherit;font-size:14px;font-weight:700;color:var(--blue);padding:4px 2px;cursor:pointer;
+    overflow-wrap:anywhere;line-height:1.15}
+  .tabs button[aria-selected="true"]{background:var(--blue);color:#fff;border-color:var(--blue)}
+  section[hidden]{display:none}
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+  .card h2{font-size:18px;margin:0 0 4px;color:var(--blue)}
+  .sub{margin:0 0 6px;color:var(--muted);font-size:14px}
+  label.f{display:block;font-weight:700;margin:12px 0 4px;font-size:16px}
+  label.f small{font-weight:500;color:var(--muted)}
+  input[type=number],input[type=text],select,textarea{width:100%;min-height:52px;font:inherit;
+    font-size:19px;padding:8px 12px;border:2px solid var(--line);border-radius:10px;background:#fff}
+  textarea{min-height:76px;font-size:17px}
+  input.err{border-color:var(--bad);background:var(--badbg)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .seg{display:grid;grid-auto-flow:column;gap:8px;margin-top:4px}
+  .seg label{position:relative;min-height:52px;border:2px solid var(--line);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;
+    background:#fff;cursor:pointer}
+  .seg input{position:absolute;opacity:0;width:1px;height:1px}
+  .seg label:has(input:checked){background:var(--blue);border-color:var(--blue);color:#fff}
+  .seg label:focus-within{outline:3px solid #8fb8e6}
+  .chk{display:flex;align-items:flex-start;gap:10px;min-height:50px;border:2px solid var(--line);
+    border-radius:10px;padding:9px 12px;margin-top:8px;background:#fff;cursor:pointer;font-size:16px;line-height:1.3}
+  .chk input{width:24px;height:24px;flex:none;margin-top:1px}
+  .chk:has(input:checked){background:var(--infobg);border-color:var(--blue)}
+  .chk.off{background:#f7f9fb;border-style:dashed;color:var(--muted)}
+  .chk.off:has(input:checked){background:#eef2f6;border-color:var(--muted)}
+  .chk .tag{margin-left:auto;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+  button.go{width:100%;min-height:58px;margin-top:14px;border:0;border-radius:12px;background:var(--blue);
+    color:#fff;font:inherit;font-size:20px;font-weight:700;cursor:pointer}
+  button.go.sec{background:#fff;color:var(--blue);border:2px solid var(--blue)}
+  button.go.danger{background:#fff;color:var(--bad);border:2px solid var(--bad);font-size:17px;min-height:50px}
+  button.go:active{opacity:.85}
+  .msg{margin-top:12px;padding:10px 12px;border-radius:10px;font-weight:700;display:none;font-size:16px}
+  .msg.show{display:block}
+  .msg.bad{background:var(--badbg);color:var(--bad);border:1.5px solid var(--bad)}
+  .msg.good{background:var(--okbg);color:var(--ok);border:1.5px solid var(--ok)}
+  .result{margin-top:12px;border-radius:12px;padding:14px;border:2px solid var(--line);display:none;background:#fff}
+  .result.show{display:block}
+  .result.l1,.result.l2{background:var(--badbg);border-color:var(--bad)}
+  .result.l3{background:var(--warnbg);border-color:var(--warn)}
+  .result.l4,.result.l5{background:var(--okbg);border-color:var(--ok)}
+  .lvl{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .lvl .big{font-size:40px;font-weight:800;line-height:1}
+  .lvl .ch{font-size:26px;font-weight:800}
+  .result.l1 .big,.result.l1 .ch,.result.l2 .big,.result.l2 .ch{color:var(--bad)}
+  .result.l3 .big,.result.l3 .ch{color:var(--warn)}
+  .result.l4 .big,.result.l4 .ch,.result.l5 .big,.result.l5 .ch{color:var(--ok)}
+  .why{margin-top:6px;font-size:16px;font-weight:700}
+  .crit-list{margin-top:10px;background:#fff;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+  .crit-list h3{margin:0;padding:7px 11px;font-size:14px;background:#eef2f6;color:var(--ink);border-bottom:1px solid var(--line)}
+  .crit-list h3.hit{background:#dff0e4;color:var(--ok)}
+  .crit-list h3.unk{background:var(--warnbg);color:var(--warn)}
+  .ci{padding:8px 11px;border-top:1px solid #eef1f4;font-size:15px;line-height:1.35}
+  .ci:first-of-type{border-top:none}
+  .ci code{font-family:"SF Mono",Menlo,monospace;font-size:13px;font-weight:700;color:var(--blue);
+    background:var(--infobg);padding:1px 5px;border-radius:4px;margin-right:5px}
+  .ci .obs{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+  .ci .pg{color:var(--muted);font-size:12px}
+  details{margin-top:10px}
+  summary{cursor:pointer;font-size:15px;color:var(--blue);font-weight:700;padding:6px 0}
+  .disc{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.4;border-top:1px dashed var(--line);padding-top:8px}
+  table.t{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+  table.t th,table.t td{border:1px solid var(--line);padding:5px 4px;text-align:left;
+    vertical-align:top;overflow-wrap:anywhere}
+  table.t th{background:#eef2f6;font-size:12px}
+  table.t td.pass{color:var(--ok);font-weight:700}
+  table.t td.fail{color:var(--bad);font-weight:700}
+  .kv{font-size:14px;color:var(--muted);margin:2px 0}
+  .kv b{color:var(--ink)}
+  .setpick{background:var(--infobg);border:2px solid var(--blue)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:20px;
+    background:var(--warnbg);color:var(--warn);margin-left:4px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>ผู้ช่วยคัดกรองช่องทาง ER/OPD</h1>
+  <p>เสนอระดับความเร่งด่วนและช่องทาง พร้อมแสดง<b>ข้อเกณฑ์ที่เข้าเป็นรายข้อ</b> · พยาบาลเป็นผู้ตัดสินสุดท้ายเสมอ<br>
+     วิชา 4 Clinical App Mini-Project · นพ.กิตติพศ เกียรติพัฒนาชัย (P49)</p>
+</header>
+
+<div class="tabs" role="tablist">
+  <button data-tab="screen" role="tab" aria-selected="true">คัดกรอง</button>
+  <button data-tab="cases" role="tab" aria-selected="false">เคสวันนี้</button>
+  <button data-tab="criteria" role="tab" aria-selected="false">ชุดเกณฑ์</button>
+  <button data-tab="test" role="tab" aria-selected="false">ทดสอบ</button>
+</div>
+
+<!-- ===================== แท็บ 1 · คัดกรอง ===================== -->
+<section id="tab-screen">
+  <div class="card setpick">
+    <label class="f" for="set-pick">ชุดเกณฑ์ที่ใช้ <small>— เปลี่ยนชุดแล้วคำตอบเปลี่ยนตาม</small></label>
+    <select id="set-pick"></select>
+    <p class="kv" id="set-info"></p>
+  </div>
+
+  <div class="card">
+    <h2>ข้อมูลผู้ป่วย</h2>
+    <p class="sub">ช่องที่ยังไม่ได้วัดเว้นว่างได้ — ระบบจะบอกว่าเกณฑ์ข้อไหน “ตัดสินไม่ได้” ไม่นับเป็นไม่เข้าเกณฑ์</p>
+
+    <label class="f" for="cc">อาการนำ</label>
+    <input type="text" id="cc" placeholder="เช่น เจ็บหน้าอก, ไข้ ไอ, ปวดท้อง" autocomplete="off">
+
+    <div class="row">
+      <div>
+        <label class="f" for="age">อายุ <small>(จำเป็น)</small></label>
+        <input type="number" id="age" inputmode="numeric" placeholder="เช่น 45">
+      </div>
+      <div>
+        <label class="f">หน่วยอายุ</label>
+        <div class="seg">
+          <label><input type="radio" name="ageu" value="year" checked><span>ปี</span></label>
+          <label><input type="radio" name="ageu" value="month"><span>เดือน</span></label>
+        </div>
+      </div>
+    </div>
+
+    <label class="f">เพศ</label>
+    <div class="seg">
+      <label><input type="radio" name="sex" value="M"><span>ชาย</span></label>
+      <label><input type="radio" name="sex" value="F"><span>หญิง</span></label>
+    </div>
+
+    <div class="row">
+      <div><label class="f" for="gcs">GCS <small>3–15</small></label>
+        <input type="number" id="gcs" inputmode="numeric" placeholder="15"></div>
+      <div><label class="f" for="pain_score">ระดับความปวด <small>0–10</small></label>
+        <input type="number" id="pain_score" inputmode="numeric" placeholder="0"></div>
+    </div>
+
+    <div class="row">
+      <div><label class="f" for="sbp">ความดันตัวบน <small>mmHg</small></label>
+        <input type="number" id="sbp" inputmode="numeric"></div>
+      <div><label class="f" for="dbp">ความดันตัวล่าง <small>mmHg</small></label>
+        <input type="number" id="dbp" inputmode="numeric"></div>
+    </div>
+
+    <div class="row3">
+      <div><label class="f" for="hr">ชีพจร <small>/นาที</small></label>
+        <input type="number" id="hr" inputmode="numeric"></div>
+      <div><label class="f" for="rr">หายใจ <small>/นาที</small></label>
+        <input type="number" id="rr" inputmode="numeric"></div>
+      <div><label class="f" for="spo2">SpO₂ <small>%</small></label>
+        <input type="number" id="spo2" inputmode="numeric"></div>
+    </div>
+
+    <label class="f" for="temp_c">อุณหภูมิ <small>°C</small></label>
+    <input type="number" id="temp_c" inputmode="decimal" step="0.1" placeholder="36.8">
+  </div>
+
+  <div class="card">
+    <h2>จุด ก — ต้องการช่วยชีวิตทันที</h2>
+    <p class="sub">ติ๊กเฉพาะสิ่งที่ผู้ป่วยต้องการ ณ ตอนนี้</p>
+    <div id="flags-A"></div>
+  </div>
+
+  <div class="card">
+    <h2>จุด ข — รอไม่ได้</h2>
+    <p class="sub">ภาวะเสี่ยง · ภาวะซึม · ภาวะปวด</p>
+    <div id="flags-B"></div>
+  </div>
+
+  <div class="card">
+    <h2>จุด ค — ทรัพยากรที่คาดว่าต้องใช้</h2>
+    <p class="sub" id="res-note"></p>
+    <div id="res-counted"></div>
+    <details>
+      <summary id="res-toggle">กิจกรรมที่คู่มือระบุว่า “ไม่นับ” เป็นทรัพยากร</summary>
+      <div id="res-notcounted"></div>
+    </details>
+  </div>
+
+  <button class="go" id="go">ประเมิน</button>
+  <div class="msg bad" id="msg"></div>
+
+  <div class="result" id="result"></div>
+</section>
+
+<!-- ===================== แท็บ 2 · เคสวันนี้ ===================== -->
+<section id="tab-cases" hidden>
+  <div class="card">
+    <h2>เคสที่บันทึกไว้</h2>
+    <p class="sub" id="cases-summary"></p>
+    <div style="overflow-x:auto"><table class="t" id="cases-table"></table></div>
+    <button class="go sec" id="csv">⬇ ดาวน์โหลด CSV</button>
+    <button class="go danger" id="clear">ล้างข้อมูลทั้งหมด</button>
+    <p class="disc">ข้อมูลเก็บไว้ใน localStorage ของเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ส่งออกไปที่ใด —
+      ในวิชา 5 Part 2 ส่วนนี้จะย้ายไปเก็บที่ Supabase (ตาราง cases · assessments · overrides)</p>
+  </div>
+</section>
+
+<!-- ===================== แท็บ 3 · ชุดเกณฑ์ ===================== -->
+<section id="tab-criteria" hidden>
+  <div class="card">
+    <h2>ชุดเกณฑ์ที่กำลังใช้</h2>
+    <div id="crit-meta"></div>
+    <label class="f" for="set-file">โหลดชุดเกณฑ์จากไฟล์ <small>(.json)</small></label>
+    <input type="file" id="set-file" accept=".json,application/json"
+           style="border:2px dashed var(--line);padding:12px;border-radius:10px;background:#fff">
+    <div class="msg" id="file-msg"></div>
+    <button class="go sec" id="set-reset">กลับไปใช้ชุดเกณฑ์เริ่มต้น</button>
+  </div>
+  <div class="card">
+    <h2>เกณฑ์ทั้งหมด</h2>
+    <div id="crit-all"></div>
+  </div>
+</section>
+
+<!-- ===================== แท็บ 4 · ทดสอบ ===================== -->
+<section id="tab-test" hidden>
+  <div class="card">
+    <h2>Known-Answer Test</h2>
+    <p class="sub">ใส่สถานการณ์ที่รู้คำตอบอยู่แล้ว แล้วดูว่าระบบตอบตรงหรือไม่ —
+      เคสที่ขึ้นต้นด้วย <b>[คู่มือ]</b> คือตัวอย่างที่คู่มือเฉลยไว้เอง</p>
+    <button class="go" id="test-go">รันชุดทดสอบ</button>
+    <div class="msg" id="test-summary"></div>
+    <div style="overflow-x:auto"><table class="t" id="test-table" style="display:none"></table></div>
+  </div>
+</section>
+
+<p class="disc" style="text-align:center">
+  เครื่องมือสาธิตเพื่อการเรียนการสอน ใช้ข้อมูลจำลองทั้งหมด · ไม่ใช่เครื่องมือแพทย์
+  และไม่ทดแทนการตัดสินใจของผู้คัดกรอง
+</p>
+</div>
+
+<script src="engine.js?v=20260903a"></script>
+<script src="criteria-moph-2561.js?v=20260903a"></script>
+<script src="criteria-moph-2561-local.js?v=20260903a"></script>
+<script src="kat-cases.js?v=20260903a"></script>
+<script>
+'use strict';
+var E = TriageEngine, SETS = window.CRITERIA_SETS, KEY = 'p49-triage-cases-v1';
+var setId = 'moph-ed-triage-2561', SET = SETS[setId], lastResult = null, lastData = null;
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+  return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+
+/* ---------------------------------------------------------------- แท็บ */
+Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function(b){
+  b.addEventListener('click', function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function(x){
+      x.setAttribute('aria-selected', String(x === b)); });
+    Array.prototype.forEach.call(document.querySelectorAll('section'), function(s){ s.hidden = true; });
+    $('tab-' + b.dataset.tab).hidden = false;
+    window.scrollTo(0, 0);
+  });
+});
+
+/* ------------------------------------------------ สร้างช่องติ๊กจากชุดเกณฑ์
+ * ไม่มี list ของธงฝังอยู่ในหน้า — ดึงจากตัวชุดเกณฑ์ทั้งหมด
+ * เปลี่ยนชุดเกณฑ์แล้วหน้าจอเปลี่ยนตามเอง                                    */
+function collectFlags(test, out){
+  if (!test) return out;
+  if (test.flag) out.push(test.flag);
+  (test.all || test.any || []).forEach(function(t){ collectFlags(t, out); });
+  return out;
+}
+function flagsOf(dp){
+  var seen = {}, list = [];
+  SET.criteria.filter(function(c){ return c.dp === dp; }).forEach(function(c){
+    collectFlags(c.test, []).forEach(function(f){
+      if (!seen[f]) { seen[f] = 1; list.push({ id: f, code: c.code, group: c.group || '', crit: c }); }
+    });
+  });
+  return list;
+}
+function labelOf(f){
+  return ((SET.meta || {}).flag_labels || {})[f.id] || f.crit.text;
+}
+function renderFlags(){
+  ['A','B'].forEach(function(dp){
+    $('flags-' + dp).innerHTML = flagsOf(dp).map(function(f){
+      return '<label class="chk"><input type="checkbox" data-flag="' + esc(f.id) + '">' +
+             '<span>' + esc(labelOf(f)) +
+             (f.crit.nurse_judgment ? '<span class="badge">ดุลยพินิจ</span>' : '') +
+             '</span><span class="tag">' + esc(f.code) + '</span></label>';
+    }).join('');
+  });
+}
+function renderResources(){
+  var r = SET.resources || { counted: [], not_counted: [] };
+  $('res-note').textContent = r.note || '';
+  $('res-counted').innerHTML = (r.counted || []).map(function(x){
+    return '<label class="chk"><input type="checkbox" data-res="' + esc(x.id) + '">' +
+           '<span>' + esc(x.label) + (x.rule ? '<span class="obs" style="display:block;color:var(--muted);font-size:12px">' + esc(x.rule) + '</span>' : '') +
+           '</span><span class="tag">นับ</span></label>';
+  }).join('');
+  $('res-notcounted').innerHTML = (r.not_counted || []).map(function(x){
+    return '<label class="chk off"><input type="checkbox" data-res="' + esc(x.id) + '">' +
+           '<span>' + esc(x.label) + '</span><span class="tag">ไม่นับ</span></label>';
+  }).join('');
+  $('res-toggle').textContent = 'กิจกรรมที่คู่มือระบุว่า “ไม่นับ” เป็นทรัพยากร (' + (r.not_counted || []).length + ' รายการ)';
+}
+
+/* ---------------------------------------------------------- เลือกชุดเกณฑ์ */
+function renderSetPicker(){
+  $('set-pick').innerHTML = Object.keys(SETS).map(function(id){
+    return '<option value="' + esc(id) + '"' + (id === setId ? ' selected' : '') + '>' +
+           esc(SETS[id].meta.name) + '</option>';
+  }).join('');
+  var m = SET.meta || {};
+  $('set-info').innerHTML = '<b>ที่มา:</b> ' + esc(m.source || '-') +
+    (m.local_source ? '<br><b>ส่วนขยายของโรงพยาบาล:</b> ' + esc(m.local_source) : '');
+}
+$('set-pick').addEventListener('change', function(){ useSet(SETS[this.value]); });
+function useSet(s){
+  SET = s; setId = s.meta.id;
+  renderSetPicker(); renderFlags(); renderResources(); renderCriteria();
+  $('result').className = 'result'; $('msg').className = 'msg bad';
+}
+
+/* ------------------------------------------------------------- อ่านฟอร์ม */
+function readForm(){
+  var checked = function(sel){
+    return Array.prototype.map.call(document.querySelectorAll(sel + ':checked'), function(i){
+      return i.dataset.flag || i.dataset.res; });
+  };
+  var sexEl = document.querySelector('input[name=sex]:checked');
+  return {
+    cc: $('cc').value, sex: sexEl ? sexEl.value : null,
+    age_value: $('age').value,
+    age_unit: document.querySelector('input[name=ageu]:checked').value,
+    gcs: $('gcs').value, sbp: $('sbp').value, dbp: $('dbp').value, hr: $('hr').value,
+    rr: $('rr').value, spo2: $('spo2').value, temp_c: $('temp_c').value,
+    pain_score: $('pain_score').value,
+    flags: checked('input[data-flag]'), resources: checked('input[data-res]')
+  };
+}
+
+/* --------------------------------------------------------------- ประเมิน */
+function critLine(x, showPage){
+  return '<div class="ci"><code>' + esc(x.code) + '</code>' + esc(x.text) +
+    (showPage && x.page ? ' <span class="pg">(คู่มือหน้า ' + x.page + ')</span>' : '') +
+    '<span class="obs">' + esc(x.observed) + '</span></div>';
+}
+$('go').addEventListener('click', function(){
+  var raw = readForm(), v = E.validate(raw), m = $('msg');
+  Array.prototype.forEach.call(document.querySelectorAll('input[type=number]'), function(i){
+    i.classList.toggle('err', !!v.bad[i.id] || (i.id === 'age' && !!v.bad.age_value)); });
+  if (!v.ok){
+    m.className = 'msg bad show'; m.textContent = v.errors.join(' · ');
+    $('result').className = 'result'; return;
+  }
+  m.className = 'msg bad';
+  var r = E.assess(v.data, SET);
+  lastResult = r; lastData = v.data;
+
+  var html = '<div class="lvl"><span class="big">ระดับ ' + r.level + '</span>' +
+    '<span class="ch">→ ' + r.channel + '</span>' +
+    (r.consider ? '<span class="badge">พิจารณา</span>' : '') + '</div>' +
+    '<div class="why">' + esc(r.reason) + '</div>' +
+    (r.resource_count !== undefined ? '<p class="kv">นับทรัพยากรที่เข้าเกณฑ์ได้ <b>' + r.resource_count + '</b> อย่าง</p>' : '');
+
+  if (r.matched.length)
+    html += '<div class="crit-list"><h3 class="hit">✔ เข้าเกณฑ์ ' + r.matched.length + ' ข้อ</h3>' +
+            r.matched.map(function(x){ return critLine(x, true); }).join('') + '</div>';
+  if (r.advisories.length)
+    html += '<div class="crit-list"><h3 class="unk">⚑ คู่มือให้พิจารณาเพิ่ม</h3>' +
+            r.advisories.map(function(x){ return critLine(x, true); }).join('') + '</div>';
+  if (r.blocking_unknown.length)
+    html += '<div class="crit-list"><h3 class="unk">? ตัดสินไม่ได้เพราะข้อมูลไม่ครบ ' +
+            r.blocking_unknown.length + ' ข้อ</h3>' +
+            r.blocking_unknown.map(function(x){ return critLine(x, true); }).join('') + '</div>';
+  html += '<details><summary>ดูข้อที่ไม่เข้าเกณฑ์ (' + r.unmatched.length + ' ข้อ)</summary>' +
+          '<div class="crit-list"><h3>✗ ไม่เข้าเกณฑ์</h3>' +
+          r.unmatched.map(function(x){ return critLine(x, false); }).join('') + '</div></details>';
+
+  html += '<div class="disc">ระบบเสนอตามชุดเกณฑ์ “' + esc(r.set_name) +
+    '” เท่านั้น <b>พยาบาลเป็นผู้ตัดสินสุดท้ายเสมอ</b> — ' + esc((SET.meta || {}).channel_rule || '') + '</div>';
+
+  html += '<button class="go" id="confirm">ยืนยันตามที่เสนอ (ระดับ ' + r.level + ' · ' + r.channel + ')</button>' +
+    '<button class="go sec" id="ovr-open">แก้ระดับเอง (override)</button>' +
+    '<div id="ovr-box" hidden><label class="f">ระดับที่บันทึกจริง</label><div class="seg">' +
+    [1,2,3,4,5].map(function(n){
+      return '<label><input type="radio" name="ovr" value="' + n + '"' + (n === r.level ? ' checked' : '') + '><span>' + n + '</span></label>';
+    }).join('') +
+    '</div><label class="f" for="ovr-reason">เหตุผล</label><select id="ovr-reason">' +
+    ['อาการเปลี่ยนแปลงระหว่างรอ','ข้อมูลเพิ่มเติมจากญาติ/ประวัติเดิม','ดุลยพินิจจากลักษณะผู้ป่วย',
+     'ข้อจำกัดของหน่วยงาน/ทรัพยากร','เกณฑ์ไม่ครอบคลุมเคสนี้','อื่น ๆ (ระบุด้านล่าง)']
+      .map(function(x){ return '<option>' + x + '</option>'; }).join('') +
+    '</select><label class="f" for="ovr-note">บันทึกเพิ่มเติม <small>(ไม่บังคับ)</small></label>' +
+    '<textarea id="ovr-note" placeholder="สั้น ๆ พอให้ทบทวนย้อนหลังได้"></textarea>' +
+    '<button class="go" id="ovr-save">บันทึกตามที่แก้</button></div>';
+
+  var box = $('result');
+  box.className = 'result show l' + r.level;
+  box.innerHTML = html;
+  $('confirm').addEventListener('click', function(){ saveCase(false); });
+  $('ovr-open').addEventListener('click', function(){ $('ovr-box').hidden = false; this.hidden = true; });
+  $('ovr-save').addEventListener('click', function(){ saveCase(true); });
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+/* --------------------------------------------------------- บันทึกเคส */
+function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){ return []; } }
+function store(a){ try { localStorage.setItem(KEY, JSON.stringify(a)); } catch(e){} }
+
+function saveCase(isOverride){
+  var r = lastResult, d = lastData;
+  if (!r) return;
+  var lvl = r.level, reason = '', note = '';
+  if (isOverride){
+    lvl = Number(document.querySelector('input[name=ovr]:checked').value);
+    reason = $('ovr-reason').value; note = $('ovr-note').value.trim();
+  }
+  var rows = load();
+  rows.push({
+    at: new Date().toISOString(), cc: d.cc || '-',
+    age: d.age_value, age_unit: d.age_unit === 'month' ? 'เดือน' : 'ปี',
+    sug_level: r.level, sug_channel: r.channel,
+    level: lvl, channel: lvl <= 2 ? 'ER' : 'OPD',
+    overridden: isOverride && lvl !== r.level,
+    reason: reason, note: note,
+    codes: r.matched.map(function(x){ return x.code; }).join(' '),
+    set_id: r.set_id
+  });
+  store(rows); renderCases();
+  var m = $('msg');
+  m.className = 'msg good show';
+  m.textContent = 'บันทึกแล้ว — ระดับ ' + lvl + ' · ' + (lvl <= 2 ? 'ER' : 'OPD') +
+    (isOverride && lvl !== r.level ? ' (แก้จากที่ระบบเสนอ ระดับ ' + r.level + ')' : '');
+  $('result').className = 'result';
+  window.scrollTo(0, 0);
+}
+
+function renderCases(){
+  var rows = load(), t = $('cases-table');
+  if (!rows.length){
+    t.innerHTML = '<tr><td>ยังไม่มีเคสที่บันทึก</td></tr>';
+    $('cases-summary').textContent = 'ยังไม่มีข้อมูล';
+    return;
+  }
+  t.innerHTML = '<tr><th style="width:14%">เวลา</th><th style="width:24%">อาการนำ</th>' +
+    '<th style="width:14%">เสนอ</th><th style="width:14%">บันทึกจริง</th><th>เกณฑ์ที่เข้า / เหตุผล</th></tr>' +
+    rows.map(function(x){
+      var tm = new Date(x.at);
+      return '<tr><td>' + ('0' + tm.getHours()).slice(-2) + ':' + ('0' + tm.getMinutes()).slice(-2) + '</td>' +
+        '<td>' + esc(x.cc) + '<br><span class="pg">' + esc(x.age) + ' ' + esc(x.age_unit) + '</span></td>' +
+        '<td>' + x.sug_level + '·' + esc(x.sug_channel) + '</td>' +
+        '<td class="' + (x.overridden ? 'fail' : 'pass') + '">' + x.level + '·' + esc(x.channel) +
+        (x.overridden ? '<br>แก้' : '') + '</td>' +
+        '<td>' + esc(x.codes || '—') + (x.reason ? '<br><span class="pg">' + esc(x.reason) +
+        (x.note ? ' — ' + esc(x.note) : '') + '</span>' : '') + '</td></tr>';
+    }).join('');
+  var ovr = rows.filter(function(x){ return x.overridden; }).length;
+  var up = rows.filter(function(x){ return x.overridden && x.level < x.sug_level; }).length;
+  $('cases-summary').innerHTML = 'ทั้งหมด <b>' + rows.length + '</b> เคส · แก้ระดับ <b>' + ovr + '</b> เคส (' +
+    Math.round(ovr / rows.length * 100) + '%) — ดันขึ้น ' + up + ' · ลดลง ' + (ovr - up);
+}
+
+$('csv').addEventListener('click', function(){
+  var rows = load();
+  if (!rows.length) return;
+  var head = ['เวลา','อาการนำ','อายุ','หน่วยอายุ','ระดับที่เสนอ','ช่องทางที่เสนอ','ระดับที่บันทึก',
+              'ช่องทางที่บันทึก','แก้ระดับ','เหตุผล','บันทึกเพิ่มเติม','เกณฑ์ที่เข้า','ชุดเกณฑ์'];
+  var q = function(s){ return '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"'; };
+  var csv = '﻿' + head.map(q).join(',') + '\r\n' + rows.map(function(x){
+    return [x.at, x.cc, x.age, x.age_unit, x.sug_level, x.sug_channel, x.level, x.channel,
+            x.overridden ? 'ใช่' : 'ไม่', x.reason, x.note, x.codes, x.set_id].map(q).join(',');
+  }).join('\r\n');
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'triage-cases-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+});
+
+/* ล้างแบบสองจังหวะ — ไม่ใช้ confirm() ของเบราว์เซอร์ */
+var armed = false, armTimer = null;
+$('clear').addEventListener('click', function(){
+  var b = this;
+  if (!armed){
+    armed = true; b.textContent = 'กดอีกครั้งเพื่อยืนยันการล้าง (ยกเลิกใน 5 วิ)';
+    armTimer = setTimeout(function(){ armed = false; b.textContent = 'ล้างข้อมูลทั้งหมด'; }, 5000);
+    return;
+  }
+  clearTimeout(armTimer); armed = false; b.textContent = 'ล้างข้อมูลทั้งหมด';
+  store([]); renderCases();
+});
+
+/* ------------------------------------------------------------ ชุดเกณฑ์ */
+function renderCriteria(){
+  var m = SET.meta || {};
+  $('crit-meta').innerHTML =
+    '<p class="kv"><b>' + esc(m.name) + '</b></p>' +
+    '<p class="kv"><b>ที่มา:</b> ' + esc(m.source || '-') + '</p>' +
+    (m.transcribed_from ? '<p class="kv"><b>ถอดความจาก:</b> ' + esc(m.transcribed_from) + '</p>' : '') +
+    (m.local_source ? '<p class="kv"><b>ส่วนขยายของโรงพยาบาล:</b> ' + esc(m.local_source) + '</p>' : '') +
+    (m.local_changes ? '<p class="kv"><b>สิ่งที่ต่างจากชุดหลัก:</b><br>• ' + m.local_changes.map(esc).join('<br>• ') + '</p>' : '') +
+    (m.channel_rule ? '<p class="kv"><b>กติกาช่องทาง:</b> ' + esc(m.channel_rule) + '</p>' : '') +
+    (m.limits ? '<p class="disc">' + esc(m.limits) + '</p>' : '') +
+    (m.not_transcribed ? '<p class="disc">⚠ ' + esc(m.not_transcribed) + '</p>' : '');
+
+  var dps = m.decision_points || {}, html = '';
+  ['A','B','C','D'].forEach(function(dp){
+    var list = SET.criteria.filter(function(c){ return c.dp === dp; });
+    if (dp === 'C'){
+      var r = SET.resources || {};
+      html += '<div class="crit-list"><h3>' + esc(dps.C || 'จุด ค') + '</h3>' +
+        '<div class="ci"><b>กิจกรรมที่นับ</b><span class="obs">' +
+        (r.counted || []).map(function(x){ return esc(x.label); }).join(' · ') + '</span></div>' +
+        '<div class="ci"><b>กิจกรรมที่ไม่นับ</b><span class="obs">' +
+        (r.not_counted || []).map(function(x){ return esc(x.label); }).join(' · ') + '</span></div></div>';
+      return;
+    }
+    if (!list.length) return;
+    html += '<div class="crit-list"><h3>' + esc(dps[dp] || ('จุด ' + dp)) + '</h3>' +
+      list.map(function(c){
+        return '<div class="ci"><code>' + esc(c.code) + '</code>' +
+          (c.group ? '<b>[' + esc(c.group) + ']</b> ' : '') + esc(c.text) +
+          (c.local_addition ? '<span class="badge">ส่วนขยาย รพ.</span>' : '') +
+          (c.page ? ' <span class="pg">(หน้า ' + c.page + ')</span>' : '') +
+          (c.note ? '<span class="obs">หมายเหตุ: ' + esc(c.note) + '</span>' : '') +
+          (c.source ? '<span class="obs">ที่มา: ' + esc(c.source) + '</span>' : '') + '</div>';
+      }).join('') + '</div>';
+  });
+  $('crit-all').innerHTML = html;
+}
+
+$('set-file').addEventListener('change', function(){
+  var f = this.files && this.files[0], msg = $('file-msg');
+  if (!f) return;
+  var rd = new FileReader();
+  rd.onload = function(){
+    try {
+      var s = JSON.parse(rd.result);
+      if (!s.criteria || !s.criteria.length) throw new Error('ไฟล์นี้ไม่มีรายการ criteria');
+      if (!s.meta || !s.meta.id) throw new Error('ไฟล์นี้ไม่มี meta.id');
+      SETS[s.meta.id] = s; useSet(s);
+      msg.className = 'msg good show';
+      msg.textContent = 'โหลดชุดเกณฑ์ “' + s.meta.name + '” แล้ว (' + s.criteria.length + ' ข้อ)';
+    } catch (err){
+      msg.className = 'msg bad show';
+      msg.textContent = 'อ่านไฟล์ไม่สำเร็จ: ' + err.message;
+    }
+  };
+  rd.readAsText(f);
+});
+$('set-reset').addEventListener('click', function(){
+  useSet(SETS['moph-ed-triage-2561']);
+  $('file-msg').className = 'msg'; $('set-file').value = '';
+});
+
+/* -------------------------------------------------------------- ทดสอบ */
+$('test-go').addEventListener('click', function(){
+  var rows = KAT_CASES.map(function(t){
+    var v = E.validate(t.data);
+    if (!v.ok) return { id: t.id, src: t.src, name: t.name, exp: '—', got: 'ข้อมูลไม่ผ่าน: ' + v.errors.join(' · '), pass: false };
+    var r = E.assess(v.data, SETS[t.set || 'moph-ed-triage-2561'] || SET);
+    var codes = r.matched.map(function(x){ return x.code; });
+    var ok = r.level === t.expect.level && r.channel === t.expect.channel &&
+             (t.expect.codes || []).every(function(c){ return codes.indexOf(c) !== -1; });
+    return { id: t.id, src: t.src, name: t.name, note: t.note,
+      exp: 'ระดับ ' + t.expect.level + ' · ' + t.expect.channel +
+           ((t.expect.codes || []).length ? ' · ' + t.expect.codes.join(',') : ''),
+      got: 'ระดับ ' + r.level + ' · ' + r.channel + (codes.length ? ' · ' + codes.join(',') : ''),
+      pass: ok };
+  });
+  var pass = rows.filter(function(x){ return x.pass; }).length;
+  $('test-table').innerHTML = '<tr><th style="width:8%">#</th><th style="width:40%">สถานการณ์</th>' +
+    '<th style="width:20%">ต้องได้</th><th style="width:20%">ได้จริง</th><th style="width:12%">ผล</th></tr>' +
+    rows.map(function(x){
+      return '<tr><td>' + esc(x.id) + '</td><td>[' + esc(x.src) + '] ' + esc(x.name) +
+        (x.note ? '<br><span class="pg">' + esc(x.note) + '</span>' : '') + '</td>' +
+        '<td>' + esc(x.exp) + '</td><td>' + esc(x.got) + '</td>' +
+        '<td class="' + (x.pass ? 'pass' : 'fail') + '">' + (x.pass ? 'ผ่าน' : 'ไม่ผ่าน') + '</td></tr>';
+    }).join('');
+  $('test-table').style.display = 'table';
+  var s = $('test-summary');
+  s.className = 'msg show ' + (pass === rows.length ? 'good' : 'bad');
+  s.textContent = 'ผ่าน ' + pass + ' / ' + rows.length + ' เคส' +
+    (pass === rows.length ? ' — ระบบตอบตรงกับเฉลยทุกเคส' : ' — มีเคสไม่ผ่าน ต้องแก้ก่อนใช้');
+});
+
+/* ---------------------------------------------------------------- เริ่ม */
+renderSetPicker(); renderFlags(); renderResources(); renderCriteria(); renderCases();
+</script>
+</body>
+</html>
