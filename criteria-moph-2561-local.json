@@ -3,7 +3,7 @@
     "id": "moph-ed-triage-2561-local",
     "name": "MOPH ED Triage 2561 — ฉบับโรงพยาบาล (จุดตัดตามอายุ)",
     "source": "กรมการแพทย์ กระทรวงสาธารณสุข. MOPH ED. TRIAGE. พิมพ์ครั้งที่ 1 (2561) — แปลมาจาก ESI (Emergency Severity Index) คัดกรอง 5 ระดับ ใช้ 4 หัวข้อเป็นจุดตัด",
-    "version": "2561",
+    "version": "2561-local",
     "effective_date": "2018-01-01",
     "transcribed_from": "capstone/refs/MOPH-ED-Triage-2561-krom-kan-phaet.pdf (24 หน้า) — ข้อความคัดจาก text layer ของเล่ม ซ่อมเฉพาะสระ/วรรณยุกต์ที่หลุดจากการฝังฟอนต์ (เช่น คาถาม → คำถาม) ไม่ได้เรียบเรียงใหม่",
     "decision_points": {
@@ -32,6 +32,7 @@
       "new_onset_altered": "ซึม/สับสนที่เพิ่งเป็น (new onset)",
       "pain_objective_signs": "มีลักษณะประกอบของความปวด (สีหน้า เหงื่อแตก ท่าทาง สัญญาณชีพเปลี่ยน)"
     },
+    "parent_set_id": "moph-ed-triage-2561",
     "local_source": "กองการพยาบาล รพ.พระมงกุฎเกล้า. วิธีปฏิบัติ PMK-WND-037 การคัดกรองผู้ป่วยนอก (แก้ไขครั้งที่ 1, 9 ต.ค. 2561) ผนวก จ/ฉ",
     "local_changes": [
       "A7 — เปลี่ยนจุดตัด shock จาก SBP < 90 เท่ากันทุกอายุ เป็นจุดตัดตามอายุ",

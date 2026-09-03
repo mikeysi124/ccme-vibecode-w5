@@ -105,7 +105,7 @@ node gen-criteria-js.js      # รันใหม่ทุกครั้งท�
 
 | สัปดาห์ | สิ่งที่เพิ่ม |
 |---|---|
-| วิชา 5 Part 2 (6 ก.ย.) | ย้าย localStorage → Supabase 7 ตาราง (`profiles · criteria_sets · criteria · cases · assessments · assessment_criteria · overrides`) + RLS/RBAC · ERD ส่งแล้ว |
+| วิชา 5 Part 2 (6 ก.ย.) | ย้าย localStorage → Supabase **9 ตาราง** — ERD อยู่ที่ [`W5-ER-Diagram-Kittipot.pdf`](W5-ER-Diagram-Kittipot.pdf) และ DDL+RLS+seed พร้อมรันที่ [`supabase-schema.sql`](supabase-schema.sql) |
 | วิชา 6 | Ethics Impact Assessment · Security audit · Privacy policy ตาม PDPA |
 | วิชา 7 | UAT กับพยาบาลคัดกรอง ≥ 3 คน — วัดเวลาต่อราย และอัตรา/เหตุผลการ override |
 

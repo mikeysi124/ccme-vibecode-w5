@@ -31,6 +31,9 @@ write('criteria-moph-2561', base);
 var local = JSON.parse(JSON.stringify(base));
 local.meta.id = 'moph-ed-triage-2561-local';
 local.meta.name = 'MOPH ED Triage 2561 — ฉบับโรงพยาบาล (จุดตัดตามอายุ)';
+/* version ต้องไม่ซ้ำกับชุดหลัก — ฐานข้อมูลบังคับ unique (source, version) */
+local.meta.version = '2561-local';
+local.meta.parent_set_id = base.meta.id;
 local.meta.local_source = PMK;
 local.meta.local_changes = [
   'A7 — เปลี่ยนจุดตัด shock จาก SBP < 90 เท่ากันทุกอายุ เป็นจุดตัดตามอายุ',
