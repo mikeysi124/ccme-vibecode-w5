@@ -47,7 +47,7 @@ engine.js        ← ตรรกะล้วน ไม่รู้จักเ�
    ↑
 criteria-*.json  ← เกณฑ์เป็น "ข้อมูล" เปลี่ยนชุด = เปลี่ยนพฤติกรรมทั้งระบบ
    ↓
-localStorage     ← เคสที่บันทึก (วิชา 5 Part 2 จะย้ายไป Supabase)
+Supabase         ← เคสที่บันทึก (PostgreSQL 9 ตาราง + RLS) · ไม่มี config = ใช้ localStorage
 ```
 
 **หลักการสำคัญ:** engine ไม่มีชื่อโรค ไม่มีตัวเลขจุดตัด ไม่มีเกณฑ์ข้อใดฝังอยู่ในโค้ดเลย
@@ -105,9 +105,39 @@ node gen-criteria-js.js      # รันใหม่ทุกครั้งท�
 
 | สัปดาห์ | สิ่งที่เพิ่ม |
 |---|---|
-| วิชา 5 Part 2 (6 ก.ย.) | ย้าย localStorage → Supabase **9 ตาราง** — ERD อยู่ที่ [`W5-ER-Diagram-Kittipot.pdf`](W5-ER-Diagram-Kittipot.pdf) และ DDL+RLS+seed พร้อมรันที่ [`supabase-schema.sql`](supabase-schema.sql) |
+| วิชา 5 Part 2 (6 ก.ย.) | ✅ **เชื่อม Supabase แล้ว** — ERD [`W5-ER-Diagram-Kittipot.pdf`](W5-ER-Diagram-Kittipot.pdf) · DDL+RLS+seed [`supabase-schema.sql`](supabase-schema.sql) · policy update/delete + trigger profiles [`supabase-w6-additions.sql`](supabase-w6-additions.sql) · ชั้นข้อมูล [`supabase-data.js`](supabase-data.js) |
 | วิชา 6 | Ethics Impact Assessment · Security audit · Privacy policy ตาม PDPA |
 | วิชา 7 | UAT กับพยาบาลคัดกรอง ≥ 3 คน — วัดเวลาต่อราย และอัตรา/เหตุผลการ override |
+
+## Backend (วิชา 5 Part 2)
+
+ฐานข้อมูล **PostgreSQL บน Supabase** 9 ตารางตาม ERD · ทำ CRUD ครบสี่คำสั่งผ่าน client SDK
+
+| คำสั่ง | ทำอะไร | ตารางที่แตะ |
+|---|---|---|
+| **POST** | บันทึกเคสที่ประเมินเสร็จ | `cases` → `assessments` → `assessment_criteria` → `overrides` |
+| **GET** | อ่านเคสพร้อมข้อมูลผู้ป่วย เกณฑ์ที่เข้า และการแก้ระดับ ในคำขอเดียว | nested select จาก `assessments` |
+| **PUT** | แก้ระดับที่ตัดสินจริงและเหตุผล | `overrides` |
+| **DELETE** | ลบเคส | `cases` (ตารางลูกหายตาม cascade) |
+
+**ความปลอดภัยหลายชั้น** — `Auth → RBAC (role ใน profiles) → REST API → validation → RLS → PostgreSQL`
+ทุกตารางเปิด RLS และเขียน policy แยกทีละคำสั่ง เทียบ `auth.uid()` กับเจ้าของแถว
+ต่อให้ข้าม UI ไปเรียก API ตรง ๆ ด้วย anon key ก็ได้ข้อมูลกลับเป็นชุดว่าง ถ้าไม่ได้ล็อกอิน
+
+**เก็บสิ่งที่บันทึกในตารางกลาง:** `assessment_criteria` เก็บเฉพาะข้อที่ **เข้าเกณฑ์** (`is_met = true`)
+และข้อที่ **ตัดสินไม่ได้เพราะยังไม่ได้วัด** (`is_met = null`) — ข้อที่ไม่เข้าเกณฑ์ไม่เก็บ
+เพราะอนุมานกลับได้จากชุดเกณฑ์เวอร์ชันเดียวกันที่ตรึงไว้ในแถว `assessments`
+
+**กุญแจ:** ค่าเชื่อมต่ออยู่ใน `supabase-config.js` (anon/publishable key เท่านั้น)
+`service_role` key ไม่อยู่ในรีโปและห้ามใช้ฝั่งหน้าเว็บ
+
+```bash
+# ตั้งค่าใหม่จากศูนย์
+cp supabase-config.example.js supabase-config.js   # ใส่ Project URL + anon key
+# แล้วรันใน Supabase SQL Editor ตามลำดับ
+#   1) supabase-schema.sql          ตาราง + RLS policy + seed เกณฑ์ 2 ชุด
+#   2) supabase-w6-additions.sql    policy update/delete + trigger สร้าง profiles
+```
 
 ## ข้อจำกัดและความปลอดภัย
 
