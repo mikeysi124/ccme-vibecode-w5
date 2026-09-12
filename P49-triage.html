@@ -49,6 +49,12 @@
     color:#fff;font:inherit;font-size:20px;font-weight:700;cursor:pointer}
   button.go.sec{background:#fff;color:var(--blue);border:2px solid var(--blue)}
   button.go.danger{background:#fff;color:var(--bad);border:2px solid var(--bad);font-size:17px;min-height:50px}
+  button.go.mini{width:auto;min-height:34px;margin:2px 4px 2px 0;padding:0 12px;font-size:14px;border-radius:8px}
+  #db-login{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  #db-login label{display:block;font-size:14px;color:var(--muted)}
+  #db-login input{width:100%;min-height:44px;font-size:16px;padding:6px 10px;border:1px solid var(--line);border-radius:10px}
+  #db-login2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:560px){#db-login,#db-login2{grid-template-columns:1fr}}
   button.go:active{opacity:.85}
   .msg{margin-top:12px;padding:10px 12px;border-radius:10px;font-weight:700;display:none;font-size:16px}
   .msg.show{display:block}
@@ -199,14 +205,28 @@
 
 <!-- ===================== แท็บ 2 · เคสวันนี้ ===================== -->
 <section id="tab-cases" hidden>
+  <div class="card" id="db-card" hidden>
+    <h2>บัญชีผู้ใช้ · ฐานข้อมูล Supabase</h2>
+    <p class="sub" id="db-status">ยังไม่ได้เข้าสู่ระบบ — เคสจะยังไม่ถูกบันทึกลงฐานข้อมูล</p>
+    <div id="db-login" class="row2">
+      <label>อีเมล<input id="db-email" type="email" autocomplete="username"></label>
+      <label>รหัสผ่าน<input id="db-pass" type="password" autocomplete="current-password"></label>
+    </div>
+    <div id="db-login2">
+      <button class="go" id="db-signin">เข้าสู่ระบบ</button>
+      <button class="go sec" id="db-signup">สมัครครั้งแรก</button>
+    </div>
+    <button class="go sec" id="db-signout" hidden>ออกจากระบบ</button>
+    <div class="msg bad" id="db-msg"></div>
+  </div>
   <div class="card">
     <h2>เคสที่บันทึกไว้</h2>
     <p class="sub" id="cases-summary"></p>
     <div style="overflow-x:auto"><table class="t" id="cases-table"></table></div>
+    <div class="card" id="edit-box" hidden style="margin-top:12px"></div>
     <button class="go sec" id="csv">⬇ ดาวน์โหลด CSV</button>
     <button class="go danger" id="clear">ล้างข้อมูลทั้งหมด</button>
-    <p class="disc">ข้อมูลเก็บไว้ใน localStorage ของเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ส่งออกไปที่ใด —
-      ในวิชา 5 Part 2 ส่วนนี้จะย้ายไปเก็บที่ Supabase (ตาราง cases · assessments · overrides)</p>
+    <p class="disc" id="store-note"></p>
   </div>
 </section>
 
@@ -249,6 +269,10 @@
 <script src="criteria-moph-2561.js?v=20260903a"></script>
 <script src="criteria-moph-2561-local.js?v=20260903a"></script>
 <script src="kat-cases.js?v=20260903a"></script>
+<!-- วิชา 5 Part 2 — Supabase (ถ้าไม่มี supabase-config.js แอปจะใช้ localStorage เหมือนเดิม) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="supabase-config.js?v=20260912a" onerror="window.SUPA_CONFIG=null"></script>
+<script src="supabase-data.js?v=20260912a"></script>
 <script>
 'use strict';
 var E = TriageEngine, SETS = window.CRITERIA_SETS, KEY = 'p49-triage-cases-v1';
@@ -425,6 +449,13 @@ function saveCase(isOverride){
     lvl = Number(document.querySelector('input[name=ovr]:checked').value);
     reason = $('ovr-reason').value; note = $('ovr-note').value.trim();
   }
+  if (dbOn()){
+    var ovr = (isOverride && lvl !== r.level) ? { level: lvl, reason: reason, note: note } : null;
+    TriageDB.saveAssessment(d, r, ovr).then(function(){
+      refreshCases(); savedMsg(lvl, isOverride, r.level, ' · เก็บลงฐานข้อมูลแล้ว');
+    }).catch(dbErr);
+    return;
+  }
   var rows = load();
   rows.push({
     at: new Date().toISOString(), cc: d.cc || '-',
@@ -436,25 +467,38 @@ function saveCase(isOverride){
     codes: r.matched.map(function(x){ return x.code; }).join(' '),
     set_id: r.set_id
   });
-  store(rows); renderCases();
+  store(rows); refreshCases();
+  savedMsg(lvl, isOverride, r.level, '');
+}
+
+function savedMsg(lvl, isOverride, sug, extra){
   var m = $('msg');
   m.className = 'msg good show';
   m.textContent = 'บันทึกแล้ว — ระดับ ' + lvl + ' · ' + (lvl <= 2 ? 'ER' : 'OPD') +
-    (isOverride && lvl !== r.level ? ' (แก้จากที่ระบบเสนอ ระดับ ' + r.level + ')' : '');
+    (isOverride && lvl !== sug ? ' (แก้จากที่ระบบเสนอ ระดับ ' + sug + ')' : '') + extra;
   $('result').className = 'result';
   window.scrollTo(0, 0);
 }
 
-function renderCases(){
-  var rows = load(), t = $('cases-table');
+var viewRows = [];
+function dbOn(){ return typeof TriageDB !== 'undefined' && TriageDB.enabled && dbUser; }
+function refreshCases(){
+  if (dbOn()) return TriageDB.listAssessments().then(drawCases).catch(dbErr);
+  drawCases(load());
+}
+function drawCases(rows){
+  viewRows = rows || [];
+  var t = $('cases-table');
   if (!rows.length){
     t.innerHTML = '<tr><td>ยังไม่มีเคสที่บันทึก</td></tr>';
     $('cases-summary').textContent = 'ยังไม่มีข้อมูล';
     return;
   }
-  t.innerHTML = '<tr><th style="width:14%">เวลา</th><th style="width:24%">อาการนำ</th>' +
-    '<th style="width:14%">เสนอ</th><th style="width:14%">บันทึกจริง</th><th>เกณฑ์ที่เข้า / เหตุผล</th></tr>' +
-    rows.map(function(x){
+  var act = dbOn();
+  t.innerHTML = '<tr><th style="width:12%">เวลา</th><th style="width:22%">อาการนำ</th>' +
+    '<th style="width:12%">เสนอ</th><th style="width:12%">บันทึกจริง</th><th>เกณฑ์ที่เข้า / เหตุผล</th>' +
+    (act ? '<th style="width:14%">จัดการ</th>' : '') + '</tr>' +
+    rows.map(function(x, i){
       var tm = new Date(x.at);
       return '<tr><td>' + ('0' + tm.getHours()).slice(-2) + ':' + ('0' + tm.getMinutes()).slice(-2) + '</td>' +
         '<td>' + esc(x.cc) + '<br><span class="pg">' + esc(x.age) + ' ' + esc(x.age_unit) + '</span></td>' +
@@ -462,7 +506,9 @@ function renderCases(){
         '<td class="' + (x.overridden ? 'fail' : 'pass') + '">' + x.level + '·' + esc(x.channel) +
         (x.overridden ? '<br>แก้' : '') + '</td>' +
         '<td>' + esc(x.codes || '—') + (x.reason ? '<br><span class="pg">' + esc(x.reason) +
-        (x.note ? ' — ' + esc(x.note) : '') + '</span>' : '') + '</td></tr>';
+        (x.note ? ' — ' + esc(x.note) : '') + '</span>' : '') + '</td>' +
+        (act ? '<td>' + (x.override_id ? '<button class="go sec mini" data-edit="' + i + '">แก้</button> ' : '') +
+               '<button class="go danger mini" data-del="' + i + '">ลบ</button></td>' : '') + '</tr>';
     }).join('');
   var ovr = rows.filter(function(x){ return x.overridden; }).length;
   var up = rows.filter(function(x){ return x.overridden && x.level < x.sug_level; }).length;
@@ -471,7 +517,7 @@ function renderCases(){
 }
 
 $('csv').addEventListener('click', function(){
-  var rows = load();
+  var rows = viewRows;
   if (!rows.length) return;
   var head = ['เวลา','อาการนำ','อายุ','หน่วยอายุ','ระดับที่เสนอ','ช่องทางที่เสนอ','ระดับที่บันทึก',
               'ช่องทางที่บันทึก','แก้ระดับ','เหตุผล','บันทึกเพิ่มเติม','เกณฑ์ที่เข้า','ชุดเกณฑ์'];
@@ -496,7 +542,12 @@ $('clear').addEventListener('click', function(){
     return;
   }
   clearTimeout(armTimer); armed = false; b.textContent = 'ล้างข้อมูลทั้งหมด';
-  store([]); renderCases();
+  if (dbOn()){
+    Promise.all(viewRows.map(function(x){ return TriageDB.deleteCase(x.case_id); }))
+      .then(refreshCases).catch(dbErr);
+    return;
+  }
+  store([]); refreshCases();
 });
 
 /* ------------------------------------------------------------ ชุดเกณฑ์ */
@@ -593,8 +644,100 @@ $('test-go').addEventListener('click', function(){
     (pass === rows.length ? ' — ระบบตอบตรงกับเฉลยทุกเคส' : ' — มีเคสไม่ผ่าน ต้องแก้ก่อนใช้');
 });
 
+/* -------------------------------------------------- Supabase (วิชา 5 Part 2) */
+var dbUser = null;
+
+function dbErr(e){
+  var m = $('db-msg');
+  m.className = 'msg bad show';
+  m.textContent = 'ฐานข้อมูล: ' + (e && e.message ? e.message : e);
+}
+
+function setDbUi(){
+  var on = typeof TriageDB !== 'undefined' && TriageDB.enabled;
+  $('db-card').hidden = !on;
+  $('store-note').textContent = !on
+    ? 'ข้อมูลเก็บใน localStorage ของเบราว์เซอร์เครื่องนี้เท่านั้น — ยังไม่ได้ตั้งค่า supabase-config.js'
+    : (dbUser
+        ? 'เก็บที่ Supabase (PostgreSQL) ตาราง cases · assessments · assessment_criteria · overrides — เห็นเฉพาะเคสที่ตนมีสิทธิ์ตาม Row Level Security'
+        : 'เชื่อมฐานข้อมูลแล้วแต่ยังไม่ได้เข้าสู่ระบบ — เคสที่บันทึกจะอยู่ใน localStorage จนกว่าจะล็อกอิน');
+  if (!on) return;
+  $('db-status').textContent = dbUser ? ('เข้าสู่ระบบเป็น ' + dbUser.email) : 'ยังไม่ได้เข้าสู่ระบบ';
+  $('db-login').hidden = !!dbUser;
+  $('db-login2').hidden = !!dbUser;
+  $('db-signout').hidden = !dbUser;
+}
+
+function initDb(){
+  setDbUi();
+  if (typeof TriageDB === 'undefined' || !TriageDB.enabled) { refreshCases(); return; }
+  TriageDB.getUser().then(function(u){ dbUser = u; setDbUi(); refreshCases(); }).catch(function(){ refreshCases(); });
+
+  $('db-signin').addEventListener('click', function(){
+    $('db-msg').className = 'msg bad';
+    TriageDB.signIn($('db-email').value.trim(), $('db-pass').value)
+      .then(function(){ return TriageDB.getUser(); })
+      .then(function(u){ dbUser = u; $('db-pass').value = ''; setDbUi(); refreshCases(); })
+      .catch(dbErr);
+  });
+
+  $('db-signup').addEventListener('click', function(){
+    $('db-msg').className = 'msg bad';
+    TriageDB.signUp($('db-email').value.trim(), $('db-pass').value, $('db-email').value.trim())
+      .then(function(r){
+        if (r && r.pending_email_confirm){
+          var m = $('db-msg'); m.className = 'msg good show';
+          m.textContent = 'สมัครแล้ว — ยืนยันอีเมลก่อน แล้วกลับมากดเข้าสู่ระบบ';
+          return;
+        }
+        return TriageDB.getUser().then(function(u){ dbUser = u; setDbUi(); refreshCases(); });
+      })
+      .catch(dbErr);
+  });
+
+  $('db-signout').addEventListener('click', function(){
+    TriageDB.signOut().then(function(){ dbUser = null; setDbUi(); refreshCases(); }).catch(dbErr);
+  });
+
+  /* แก้ (PUT) และลบ (DELETE) ของแต่ละแถว */
+  $('cases-table').addEventListener('click', function(ev){
+    var b = ev.target.closest ? ev.target.closest('button') : null;
+    if (!b) return;
+    var x = viewRows[Number(b.dataset.edit != null ? b.dataset.edit : b.dataset.del)];
+    if (!x) return;
+    if (b.dataset.del != null){
+      if (b.textContent !== 'ยืนยันลบ'){ b.textContent = 'ยืนยันลบ';
+        setTimeout(function(){ b.textContent = 'ลบ'; }, 5000); return; }
+      TriageDB.deleteCase(x.case_id).then(refreshCases).catch(dbErr);
+      return;
+    }
+    openEdit(x);
+  });
+}
+
+/* ฟอร์มแก้ระดับที่ตัดสินจริง — เขียนทับแถวใน overrides ด้วยคำสั่ง update */
+function openEdit(x){
+  var box = $('edit-box');
+  box.hidden = false;
+  box.innerHTML = '<h3 style="margin:0 0 6px">แก้เคส ' + esc(x.case_code || '') + '</h3>' +
+    '<div id="db-login"><label>ระดับที่ตัดสินจริง<select id="ed-level">' +
+    [1,2,3,4,5].map(function(n){ return '<option value="' + n + '"' + (n === x.level ? ' selected' : '') +
+      '>ระดับ ' + n + ' · ' + (n <= 2 ? 'ER' : 'OPD') + '</option>'; }).join('') +
+    '</select></label><label>เหตุผล<input id="ed-reason" value="' + esc(x.reason || '') + '"></label></div>' +
+    '<label style="display:block;margin-top:8px">บันทึกเพิ่มเติม<input id="ed-note" style="width:100%;min-height:44px;font-size:16px;padding:6px 10px;border:1px solid var(--line);border-radius:10px" value="' + esc(x.note || '') + '"></label>' +
+    '<div id="db-login2"><button class="go" id="ed-save">บันทึกการแก้ไข</button>' +
+    '<button class="go sec" id="ed-cancel">ยกเลิก</button></div>';
+  $('ed-save').addEventListener('click', function(){
+    TriageDB.updateOverride(x.override_id, Number($('ed-level').value),
+                            $('ed-reason').value, $('ed-note').value)
+      .then(function(){ box.hidden = true; refreshCases(); }).catch(dbErr);
+  });
+  $('ed-cancel').addEventListener('click', function(){ box.hidden = true; });
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 /* ---------------------------------------------------------------- เริ่ม */
-renderSetPicker(); renderFlags(); renderResources(); renderCriteria(); renderCases();
+renderSetPicker(); renderFlags(); renderResources(); renderCriteria(); initDb();
 </script>
 </body>
 </html>
