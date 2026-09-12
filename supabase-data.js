@@ -5,7 +5,7 @@
      PUT    แก้ override ของเคสที่บันทึกไว้
      DELETE ลบเคส (assessments/criteria/overrides ตามด้วย on delete cascade)
 
-   ไม่มี key ฝังในไฟล์นี้ — อ่านจาก window.SUPA_CONFIG (supabase-config.js ที่ gitignore ไว้)
+   ไม่มี key ฝังในไฟล์นี้ — อ่านจาก window.SUPA_CONFIG (supabase-config.js ในรีโป = anon key เท่านั้น)
    ถ้าไม่มี config แอปจะกลับไปใช้ localStorage เหมือนเดิม */
 (function (root) {
   'use strict';
