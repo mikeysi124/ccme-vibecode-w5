@@ -85,6 +85,8 @@
       <li><code>criteria-moph-2561.json</code> · <code>criteria-moph-2561-local.json</code> — ชุดเกณฑ์</li>
       <li><code>kat-cases.js</code> — ชุดทดสอบ 29 เคส (ใช้ร่วมกันทั้งในแอปและใน <code>node test-engine.js</code>)</li>
       <li><code>test-engine.js</code> — ชุดตรวจ 58 ข้อ รันด้วย Node</li>
+      <li><code>supabase-data.js</code> — ชั้นข้อมูล Supabase (CRUD ครบสี่คำสั่งบนตารางจริง)</li>
+      <li><code>supabase-w6-additions.sql</code> — policy update/delete + trigger สร้าง profiles</li>
     </ul>
     <a class="btn sec" href="https://github.com/mikeysi124/ccme-vibecode-w5">ดู source code บน GitHub</a>
   </div>
@@ -97,10 +99,26 @@
     <a class="btn sec" href="supabase-schema.sql">🗄 supabase-schema.sql</a>
   </div>
 
+  <div class="card">
+    <h2>วิชา 5 Part 2 — Frontend–Backend Integration</h2>
+    <p class="kv">แอปเชื่อม Supabase (PostgreSQL) ผ่าน client SDK แล้ว ทำ CRUD ครบสี่คำสั่งบนตารางจริงตาม ERD:</p>
+    <ul>
+      <li><b>POST</b> บันทึกเคส → <code>cases</code> → <code>assessments</code> → <code>assessment_criteria</code> → <code>overrides</code></li>
+      <li><b>GET</b> อ่านเคสพร้อมข้อมูลผู้ป่วย เกณฑ์ที่เข้า และการแก้ระดับ ในคำขอเดียว</li>
+      <li><b>PUT</b> แก้ระดับที่ตัดสินจริงและเหตุผลในตาราง <code>overrides</code></li>
+      <li><b>DELETE</b> ลบเคส โดย assessments / criteria / overrides หายตาม cascade</li>
+    </ul>
+    <p class="kv"><b>ความปลอดภัยหลายชั้น:</b> Supabase Auth → RBAC จากคอลัมน์ role ใน <code>profiles</code>
+      → validation ทั้งฝั่งหน้าเว็บและ CHECK constraint → <b>RLS ทุกตาราง</b> เทียบ <code>auth.uid()</code> กับเจ้าของแถว</p>
+    <p class="kv"><b>กุญแจ:</b> ค่าเชื่อมต่ออยู่ใน <code>supabase-config.js</code> ที่ไม่ขึ้น GitHub —
+      หน้าเว็บสาธารณะนี้จึงทำงานในโหมด localStorage · การสาธิต CRUD รันจากเครื่องที่มีไฟล์ตั้งค่า</p>
+    <a class="btn sec" href="supabase-w6-additions.sql">🔐 supabase-w6-additions.sql</a>
+  </div>
+
   <p class="disc">
     ⚠️ เครื่องมือสาธิตเพื่อการเรียนการสอนเท่านั้น ใช้สถานการณ์จำลองทั้งหมด ไม่มีข้อมูลผู้ป่วยจริง
     ไม่เก็บชื่อ / HN / เลขบัตรประชาชน · ไม่ใช่เครื่องมือแพทย์ ยังไม่ผ่านการตรวจสอบความแม่นยำทางคลินิก
-    และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · ข้อมูลที่บันทึกอยู่ใน localStorage ของเบราว์เซอร์เครื่องผู้ใช้เท่านั้น
+    และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · หน้าเว็บสาธารณะนี้บันทึกลง localStorage ของเบราว์เซอร์เครื่องผู้ใช้เท่านั้น ไม่ส่งออกไปที่ใด
   </p>
 </div>
 </body>
