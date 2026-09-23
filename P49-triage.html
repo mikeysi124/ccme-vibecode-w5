@@ -19,7 +19,7 @@
     font:inherit;font-size:14px;font-weight:700;color:var(--blue);padding:4px 2px;cursor:pointer;
     overflow-wrap:anywhere;line-height:1.15}
   .tabs button[aria-selected="true"]{background:var(--blue);color:#fff;border-color:var(--blue)}
-  section[hidden]{display:none}
+  [hidden]{display:none!important}
   .card{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
   .card h2{font-size:18px;margin:0 0 4px;color:var(--blue)}
   .sub{margin:0 0 6px;color:var(--muted);font-size:14px}
@@ -50,12 +50,13 @@
   button.go.sec{background:#fff;color:var(--blue);border:2px solid var(--blue)}
   button.go.danger{background:#fff;color:var(--bad);border:2px solid var(--bad);font-size:17px;min-height:50px}
   button.go.mini{width:auto;min-height:34px;margin:2px 4px 2px 0;padding:0 12px;font-size:14px;border-radius:8px}
-  #db-login{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  #db-login label{display:block;font-size:14px;color:var(--muted)}
-  #db-login input{width:100%;min-height:44px;font-size:16px;padding:6px 10px;border:1px solid var(--line);border-radius:10px}
+  #db-login,.dbgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  #db-login label,.dbgrid label{display:block;font-size:14px;color:var(--muted)}
+  #db-login input,.dbgrid input{width:100%;min-height:44px;font-size:16px;padding:6px 10px;border:1px solid var(--line);border-radius:10px}
   #db-login2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media(max-width:560px){#db-login,#db-login2{grid-template-columns:1fr}}
+  @media(max-width:560px){#db-login,#db-login2,.dbgrid{grid-template-columns:1fr}}
   button.go:active{opacity:.85}
+  button.go:disabled{opacity:.45;cursor:not-allowed}
   .msg{margin-top:12px;padding:10px 12px;border-radius:10px;font-weight:700;display:none;font-size:16px}
   .msg.show{display:block}
   .msg.bad{background:var(--badbg);color:var(--bad);border:1.5px solid var(--bad)}
@@ -103,7 +104,7 @@
 <header>
   <h1>ผู้ช่วยคัดกรองช่องทาง ER/OPD</h1>
   <p>เสนอระดับความเร่งด่วนและช่องทาง พร้อมแสดง<b>ข้อเกณฑ์ที่เข้าเป็นรายข้อ</b> · พยาบาลเป็นผู้ตัดสินสุดท้ายเสมอ<br>
-     วิชา 4 Clinical App Mini-Project · นพ.กิตติพศ เกียรติพัฒนาชัย (P49)</p>
+     นพ.กิตติพศ เกียรติพัฒนาชัย (P49) · <b>เวอร์ชัน 1.2.0</b> · <a href="./#versions">ประวัติเวอร์ชัน</a></p>
 </header>
 
 <div class="tabs" role="tablist">
@@ -124,6 +125,7 @@
   <div class="card">
     <h2>ข้อมูลผู้ป่วย</h2>
     <p class="sub">ช่องที่ยังไม่ได้วัดเว้นว่างได้ — ระบบจะบอกว่าเกณฑ์ข้อไหน “ตัดสินไม่ได้” ไม่นับเป็นไม่เข้าเกณฑ์</p>
+    <p class="sub"><b>ใช้ข้อมูลสมมติเท่านั้น</b> ห้ามพิมพ์ชื่อ นามสกุล HN หรือเลขบัตรของผู้ป่วยจริงลงช่องใด</p>
 
     <label class="f" for="cc">อาการนำ</label>
     <input type="text" id="cc" placeholder="เช่น เจ็บหน้าอก, ไข้ ไอ, ปวดท้อง" autocomplete="off">
@@ -208,6 +210,33 @@
   <div class="card" id="db-card" hidden>
     <h2>บัญชีผู้ใช้ · ฐานข้อมูล Supabase</h2>
     <p class="sub" id="db-status">ยังไม่ได้เข้าสู่ระบบ — เคสจะยังไม่ถูกบันทึกลงฐานข้อมูล</p>
+    <p class="kv"><b>เก็บอะไร:</b> อีเมลที่ใช้เข้าสู่ระบบ ซึ่งใช้เป็นชื่อที่แสดงด้วย · เคสที่ท่านบันทึก (อายุ เพศ สัญญาณชีพ ข้อเกณฑ์ ระดับที่ระบบเสนอ ระดับที่ท่านตัดสินพร้อมเหตุผล) · เวลาและผู้บันทึก</p>
+    <p class="kv"><b>ใช้ทำอะไร:</b> ยืนยันตัวตน แยกข้อมูลของแต่ละคน และตรวจย้อนหลังว่าการคัดแยกอ้างเกณฑ์ข้อใด</p>
+    <p class="kv"><b>เก็บที่ไหน:</b> Supabase ภูมิภาค Singapore (ap-southeast-1) เปิด Row Level Security ทุกตาราง</p>
+    <p class="kv"><b>ผู้รับผิดชอบ:</b> นพ.กิตติพศ เกียรติพัฒนาชัย ผู้พัฒนา · ขอลบบัญชีหรือแจ้งเหตุผ่าน
+      <a href="https://github.com/mikeysi124/ccme-vibecode-w5/issues">GitHub Issues</a> โดยไม่ใส่ข้อมูลส่วนบุคคล
+      · <a href="docs/privacy-policy-consent-v1.0.pdf">นโยบายและแบบขอความยินยอมฉบับเต็ม</a></p>
+    <div id="consent-box">
+      <label class="f">แบบขอความยินยอม v1.0 <small>ไม่ยินยอมก็ใช้ประเมินได้ เคสจะเก็บในเครื่องนี้เท่านั้น</small></label>
+      <label class="chk"><input type="checkbox" id="cs1"><span>ข้อ 1 บัญชีผู้ใช้ — ยินยอมให้เก็บอีเมลซึ่งใช้เป็นชื่อที่แสดงด้วย บทบาท และหน่วยงาน เพื่อยืนยันตัวตนและกำหนดสิทธิ์</span><span class="tag">จำเป็น</span></label>
+      <label class="chk"><input type="checkbox" id="cs2"><span>ข้อ 2 บันทึกการตัดสินใจ — ยินยอมให้บันทึกว่ายืนยันหรือเปลี่ยนระดับใด เมื่อใด ด้วยเหตุผลใด เพื่อตรวจสอบย้อนหลัง</span><span class="tag">จำเป็น</span></label>
+      <label class="chk"><input type="checkbox" id="cs3"><span>ข้อ 3 ใช้สถิติรวมที่ไม่ระบุตัวบุคคล เช่น อัตราการ override เพื่อพัฒนาคุณภาพระบบ</span><span class="tag">เลือกได้</span></label>
+      <label class="chk"><input type="checkbox" id="cs4"><span>ข้อ 4 ใช้ข้อมูลเคสที่ไม่ระบุตัวบุคคลในงานวิจัยความแม่นยำที่รอยต่อระดับ 2/3 หลังผ่านคณะกรรมการจริยธรรมแล้วเท่านั้น</span><span class="tag">เลือกได้</span></label>
+      <label class="f">ตรวจความเข้าใจ: ใครเป็นผู้ตัดสินระดับความเร่งด่วนสุดท้าย</label>
+      <div class="seg">
+        <label><input type="radio" name="csq" value="system"><span>ระบบ</span></label>
+        <label><input type="radio" name="csq" value="screener"><span>ผู้คัดกรอง</span></label>
+      </div>
+      <p class="sub" id="consent-hint"></p>
+      <button class="go" id="consent-save" hidden>บันทึกความยินยอม</button>
+    </div>
+    <div id="consent-now" hidden>
+      <p class="kv" id="consent-when"></p>
+      <label class="chk"><input type="checkbox" id="cn3"><span>ข้อ 3 สถิติรวมที่ไม่ระบุตัวบุคคล</span><span class="tag">กดเพื่อให้/ถอน</span></label>
+      <label class="chk"><input type="checkbox" id="cn4"><span>ข้อ 4 งานวิจัยหลังผ่านคณะกรรมการจริยธรรม</span><span class="tag">กดเพื่อให้/ถอน</span></label>
+      <button class="go danger" id="consent-withdraw">ถอนความยินยอมข้อ 1–2 และออกจากระบบ</button>
+      <p class="sub">ถอนแล้วเคสใหม่จะเก็บในเครื่องนี้เท่านั้น · ขอลบบัญชีผ่านช่องทางข้างบน</p>
+    </div>
     <div id="db-login" class="row2">
       <label>อีเมล<input id="db-email" type="email" autocomplete="username"></label>
       <label>รหัสผ่าน<input id="db-pass" type="password" autocomplete="current-password"></label>
@@ -261,7 +290,7 @@
 
 <p class="disc" style="text-align:center">
   เครื่องมือสาธิตเพื่อการเรียนการสอน ใช้ข้อมูลจำลองทั้งหมด · ไม่ใช่เครื่องมือแพทย์
-  และไม่ทดแทนการตัดสินใจของผู้คัดกรอง
+  และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · เวอร์ชัน 1.2.0 (23 ก.ย. 2569)
 </p>
 </div>
 
@@ -272,7 +301,7 @@
 <!-- วิชา 5 Part 2 — Supabase (ถ้าไม่มี supabase-config.js แอปจะใช้ localStorage เหมือนเดิม) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="supabase-config.js?v=20260912a" onerror="window.SUPA_CONFIG=null"></script>
-<script src="supabase-data.js?v=20260912a"></script>
+<script src="supabase-data.js?v=20260923a"></script>
 <script>
 'use strict';
 var E = TriageEngine, SETS = window.CRITERIA_SETS, KEY = 'p49-triage-cases-v1';
@@ -451,9 +480,21 @@ function saveCase(isOverride){
   }
   if (dbOn()){
     var ovr = (isOverride && lvl !== r.level) ? { level: lvl, reason: reason, note: note } : null;
-    TriageDB.saveAssessment(d, r, ovr).then(function(){
+    /* ตรวจความยินยอมกับบัญชีที่ใช้อยู่จริงอีกครั้ง แล้วผูกการบันทึกกับบัญชีนั้น กันกรณีสลับบัญชีจากแท็บอื่น */
+    var expectId = dbUser && dbUser.id;
+    TriageDB.getUser().then(function(u){
+      if (!u || u.id !== expectId || !consentOf(u)){
+        dbUser = u; setDbUi();
+        throw new Error(u && u.id !== expectId ? 'บัญชีถูกเปลี่ยนจากแท็บอื่น เคสยังไม่ถูกบันทึก ตรวจชื่อบัญชีแล้วกดใหม่'
+                                              : 'บัญชีนี้ยังไม่มีบันทึกความยินยอม เคสยังไม่ถูกบันทึก');
+      }
+      return TriageDB.saveAssessment(d, r, ovr, u.id);
+    }).then(function(){
       refreshCases(); savedMsg(lvl, isOverride, r.level, ' · เก็บลงฐานข้อมูลแล้ว');
-    }).catch(dbErr);
+    }).catch(function(e){
+      dbErr(e);
+      var m = $('msg'); m.className = 'msg bad show'; m.textContent = 'ฐานข้อมูล: ' + (e && e.message ? e.message : e);
+    });
     return;
   }
   var rows = load();
@@ -481,7 +522,8 @@ function savedMsg(lvl, isOverride, sug, extra){
 }
 
 var viewRows = [];
-function dbOn(){ return typeof TriageDB !== 'undefined' && TriageDB.enabled && dbUser; }
+/* เขียนฐานข้อมูลได้เมื่อล็อกอินและมีบันทึกความยินยอมข้อ 1–2 แล้วเท่านั้น ไม่งั้นเคสอยู่ในเครื่อง */
+function dbOn(){ return typeof TriageDB !== 'undefined' && TriageDB.enabled && !!consentOf(dbUser); }
 function refreshCases(){
   if (dbOn()) return TriageDB.listAssessments().then(drawCases).catch(dbErr);
   drawCases(load());
@@ -647,6 +689,55 @@ $('test-go').addEventListener('click', function(){
 /* -------------------------------------------------- Supabase (วิชา 5 Part 2) */
 var dbUser = null;
 
+/* ความยินยอมตาม PDPA — แบบฟอร์ม v1.0 จากงานวิชา 6 (docs/privacy-policy-consent-v1.0.pdf)
+ * เก็บค่าล่าสุดใน user_metadata.consent และต่อท้ายทุกครั้งที่ให้/ถอนใน consent_log
+ * ผู้ใช้แก้ user_metadata ของตัวเองได้ จึงใช้เป็นบันทึกการยินยอมเท่านั้น ห้ามใช้ตัดสินสิทธิ์
+ * ตัวกั้นอยู่ที่หน้าแอป ฐานข้อมูลยังไม่บังคับ consent เอง
+ * ponytail: ถ้าต้องเป็นหลักฐานที่ผู้ใช้แก้ไม่ได้ ย้ายไปตาราง consent แบบเพิ่มได้อย่างเดียว + ให้ RLS ของ cases ตรวจ */
+var CONSENT_V = '1.0';
+/* user_metadata ติดไปใน JWT ทุกคำขอ จึงเก็บประวัติแค่ 10 ครั้งล่าสุด · ประวัติเต็มต้องใช้ตารางในฐานข้อมูล */
+var CONSENT_LOG_MAX = 10;
+function consentOf(u){
+  var c = u && u.user_metadata && u.user_metadata.consent;
+  return c && c.v === CONSENT_V && c.c1 === true && c.c2 === true && c.understood === true ? c : null;
+}
+/* ค่าเริ่มต้นของแบบฟอร์มคือไม่ติ๊ก ล้างทุกครั้งหลังใช้ กันคำตอบเก่าติดไปรอบหน้าหรือบัญชีถัดไป */
+function resetConsentForm(){
+  ['cs1','cs2','cs3','cs4'].forEach(function(id){ $(id).checked = false; });
+  Array.prototype.forEach.call(document.querySelectorAll('input[name=csq]'), function(r){ r.checked = false; });
+}
+function consentPicked(){
+  var q = document.querySelector('input[name=csq]:checked');
+  return { v: CONSENT_V, at: new Date().toISOString(),
+           c1: $('cs1').checked, c2: $('cs2').checked, c3: $('cs3').checked, c4: $('cs4').checked,
+           understood: !!q && q.value === 'screener' };
+}
+function syncConsentUi(){
+  var c = consentPicked(), answered = !!document.querySelector('input[name=csq]:checked'),
+      ok = c.c1 && c.c2 && c.understood;
+  ['db-signin','db-signup','consent-save'].forEach(function(id){ $(id).disabled = !ok; });
+  $('consent-hint').textContent = answered && !c.understood
+    ? 'ระบบเป็นแค่ผู้เสนอ ผู้คัดกรองเป็นผู้ตัดสินสุดท้ายเสมอ'
+    : (ok ? '' : 'ติ๊กข้อ 1–2 และตอบคำถามก่อน จึงจะเข้าสู่ระบบได้');
+}
+/* บันทึกทีละคำขอ และสร้างค่าใหม่จากข้อมูลบัญชีล่าสุดเสมอ กันคำขอซ้อนทับกันหรือเขียนข้ามบัญชี
+ * make(ค่าความยินยอมล่าสุดของบัญชี) คืนค่าที่จะบันทึก · คืน null = ยกเลิก */
+var consentQueue = Promise.resolve();
+function recordConsent(make){
+  var run = consentQueue.then(function(){
+    return TriageDB.getUser().then(function(u){
+      if (!u) throw new Error('ยังไม่ได้เข้าสู่ระบบ');
+      if (dbUser && dbUser.id && u.id !== dbUser.id){ dbUser = u; throw new Error('บัญชีถูกเปลี่ยนจากแท็บอื่น ตรวจชื่อบัญชีแล้วลองใหม่'); }
+      var meta = u.user_metadata || {}, c = make(meta.consent || null);
+      if (!c) throw new Error('ความยินยอมของบัญชีนี้เปลี่ยนไปแล้ว ตรวจสถานะแล้วลองใหม่');
+      var log = (Array.isArray(meta.consent_log) ? meta.consent_log : []).concat([c]).slice(-CONSENT_LOG_MAX);
+      return TriageDB.saveConsent(c, log);
+    }).then(function(nu){ if (nu) dbUser = nu; });
+  });
+  consentQueue = run.catch(function(){});
+  return run;
+}
+
 function dbErr(e){
   var m = $('db-msg');
   m.className = 'msg bad show';
@@ -654,18 +745,27 @@ function dbErr(e){
 }
 
 function setDbUi(){
-  var on = typeof TriageDB !== 'undefined' && TriageDB.enabled;
+  var on = typeof TriageDB !== 'undefined' && TriageDB.enabled, has = consentOf(dbUser);
   $('db-card').hidden = !on;
   $('store-note').textContent = !on
     ? 'ข้อมูลเก็บใน localStorage ของเบราว์เซอร์เครื่องนี้เท่านั้น — ยังไม่ได้ตั้งค่า supabase-config.js'
-    : (dbUser
+    : (dbOn()
         ? 'เก็บที่ Supabase (PostgreSQL) ตาราง cases · assessments · assessment_criteria · overrides — เห็นเฉพาะเคสที่ตนมีสิทธิ์ตาม Row Level Security'
-        : 'เชื่อมฐานข้อมูลแล้วแต่ยังไม่ได้เข้าสู่ระบบ — เคสที่บันทึกจะอยู่ใน localStorage จนกว่าจะล็อกอิน');
+        : 'เชื่อมฐานข้อมูลแล้ว แต่ยังไม่ได้เข้าสู่ระบบหรือยังไม่ได้ให้ความยินยอม — เคสที่บันทึกจะอยู่ใน localStorage ของเครื่องนี้');
   if (!on) return;
-  $('db-status').textContent = dbUser ? ('เข้าสู่ระบบเป็น ' + dbUser.email) : 'ยังไม่ได้เข้าสู่ระบบ';
+  $('db-status').textContent = !dbUser ? 'ยังไม่ได้เข้าสู่ระบบ'
+    : 'เข้าสู่ระบบเป็น ' + dbUser.email + (has ? '' : ' · ยังไม่มีบันทึกความยินยอม v' + CONSENT_V + ' เคสจะยังเก็บในเครื่องนี้');
+  $('consent-box').hidden = !!has;
+  $('consent-save').hidden = !dbUser || !!has;
+  $('consent-now').hidden = !has;
+  if (has){
+    $('consent-when').textContent = 'ให้ความยินยอม v' + has.v + ' ล่าสุดเมื่อ ' + new Date(has.at).toLocaleString('th-TH');
+    $('cn3').checked = !!has.c3; $('cn4').checked = !!has.c4;
+  }
   $('db-login').hidden = !!dbUser;
   $('db-login2').hidden = !!dbUser;
   $('db-signout').hidden = !dbUser;
+  syncConsentUi();
 }
 
 function initDb(){
@@ -673,18 +773,59 @@ function initDb(){
   if (typeof TriageDB === 'undefined' || !TriageDB.enabled) { refreshCases(); return; }
   TriageDB.getUser().then(function(u){ dbUser = u; setDbUi(); refreshCases(); }).catch(function(){ refreshCases(); });
 
+  Array.prototype.forEach.call(document.querySelectorAll('#consent-box input'), function(i){
+    i.addEventListener('change', syncConsentUi); });
+
   $('db-signin').addEventListener('click', function(){
     $('db-msg').className = 'msg bad';
+    var c = consentPicked();
     TriageDB.signIn($('db-email').value.trim(), $('db-pass').value)
       .then(function(){ return TriageDB.getUser(); })
-      .then(function(u){ dbUser = u; $('db-pass').value = ''; setDbUi(); refreshCases(); })
-      .catch(dbErr);
+      .then(function(u){ dbUser = u; $('db-pass').value = ''; return recordConsent(function(){ return c; }); })
+      .then(function(){ resetConsentForm(); setDbUi(); refreshCases(); })
+      .catch(function(e){ setDbUi(); dbErr(e); });
+  });
+
+  $('consent-save').addEventListener('click', function(){
+    $('db-msg').className = 'msg bad';
+    var c = consentPicked();
+    recordConsent(function(){ return c; }).then(function(){ resetConsentForm(); setDbUi(); refreshCases(); }).catch(dbErr);
+  });
+
+  /* ถอนข้อ 1–2 = บันทึกการถอนก่อน แล้วออกจากระบบ · ข้อ 3–4 ถอนตามไปด้วย */
+  $('consent-withdraw').addEventListener('click', function(){
+    if (!consentOf(dbUser)) return;
+    $('db-msg').className = 'msg bad';
+    recordConsent(function(cur){
+      var n = {};
+      for (var k in (cur || {})) n[k] = cur[k];
+      n.v = CONSENT_V; n.c1 = false; n.c2 = false; n.c3 = false; n.c4 = false; n.at = new Date().toISOString();
+      return n;
+    }).then(function(){ return TriageDB.signOut(); })
+      .then(function(){ dbUser = null; resetConsentForm(); setDbUi(); refreshCases(); })
+      .catch(function(e){ setDbUi(); dbErr(e); });
+  });
+
+  /* ให้หรือถอนข้อ 3–4 ด้วยคลิกเดียว เท่ากับตอนให้ */
+  ['cn3','cn4'].forEach(function(id){
+    $(id).addEventListener('change', function(){
+      var want3 = $('cn3').checked, want4 = $('cn4').checked;
+      $('db-msg').className = 'msg bad';
+      recordConsent(function(cur){
+        if (!consentOf({ user_metadata: { consent: cur } })) return null;
+        var n = {};
+        for (var k in cur) n[k] = cur[k];
+        n.c3 = want3; n.c4 = want4; n.at = new Date().toISOString();
+        return n;
+      }).then(setDbUi).catch(function(e){ setDbUi(); dbErr(e); });
+    });
   });
 
   $('db-signup').addEventListener('click', function(){
     $('db-msg').className = 'msg bad';
-    TriageDB.signUp($('db-email').value.trim(), $('db-pass').value, $('db-email').value.trim())
+    TriageDB.signUp($('db-email').value.trim(), $('db-pass').value, $('db-email').value.trim(), null, consentPicked())
       .then(function(r){
+        resetConsentForm(); syncConsentUi();
         if (r && r.pending_email_confirm){
           var m = $('db-msg'); m.className = 'msg good show';
           m.textContent = 'สมัครแล้ว — ยืนยันอีเมลก่อน แล้วกลับมากดเข้าสู่ระบบ';
@@ -696,7 +837,7 @@ function initDb(){
   });
 
   $('db-signout').addEventListener('click', function(){
-    TriageDB.signOut().then(function(){ dbUser = null; setDbUi(); refreshCases(); }).catch(dbErr);
+    TriageDB.signOut().then(function(){ dbUser = null; resetConsentForm(); setDbUi(); refreshCases(); }).catch(dbErr);
   });
 
   /* แก้ (PUT) และลบ (DELETE) ของแต่ละแถว */
@@ -720,12 +861,12 @@ function openEdit(x){
   var box = $('edit-box');
   box.hidden = false;
   box.innerHTML = '<h3 style="margin:0 0 6px">แก้เคส ' + esc(x.case_code || '') + '</h3>' +
-    '<div id="db-login"><label>ระดับที่ตัดสินจริง<select id="ed-level">' +
+    '<div class="dbgrid"><label>ระดับที่ตัดสินจริง<select id="ed-level">' +
     [1,2,3,4,5].map(function(n){ return '<option value="' + n + '"' + (n === x.level ? ' selected' : '') +
       '>ระดับ ' + n + ' · ' + (n <= 2 ? 'ER' : 'OPD') + '</option>'; }).join('') +
     '</select></label><label>เหตุผล<input id="ed-reason" value="' + esc(x.reason || '') + '"></label></div>' +
     '<label style="display:block;margin-top:8px">บันทึกเพิ่มเติม<input id="ed-note" style="width:100%;min-height:44px;font-size:16px;padding:6px 10px;border:1px solid var(--line);border-radius:10px" value="' + esc(x.note || '') + '"></label>' +
-    '<div id="db-login2"><button class="go" id="ed-save">บันทึกการแก้ไข</button>' +
+    '<div class="dbgrid"><button class="go" id="ed-save">บันทึกการแก้ไข</button>' +
     '<button class="go sec" id="ed-cancel">ยกเลิก</button></div>';
   $('ed-save').addEventListener('click', function(){
     TriageDB.updateOverride(x.override_id, Number($('ed-level').value),

@@ -30,7 +30,8 @@
   <h1>Clinical App Mini-Project — ผู้ช่วยคัดกรองช่องทาง ER/OPD</h1>
   <p class="lead">
     Workshop on Vibe Coding for Clinical Innovation 2026 · ศูนย์การศึกษาต่อเนื่องของแพทย์ (ศ.น.พ.)<br>
-    วิชา 4 Vibe Coding &amp; Low-Code Fundamentals · <b>นพ.กิตติพศ เกียรติพัฒนาชัย · User Code P49</b>
+    Working Prototype วิชา 7 · ต่อยอดจากวิชา 3–6 · <b>นพ.กิตติพศ เกียรติพัฒนาชัย · User Code P49</b>
+    · <b>เวอร์ชัน 1.2.0</b>
   </p>
 
   <div class="card">
@@ -60,7 +61,7 @@
           เข้าเกณฑ์ · ตัดสินไม่ได้เพราะข้อมูลไม่ครบ · ไม่เข้าเกณฑ์</li>
       <li><b>สลับชุดเกณฑ์ได้โดยไม่แก้โค้ด</b> — มีให้เลือก 2 ชุด (ฉบับคู่มือ และฉบับโรงพยาบาลที่ใช้จุดตัดตามอายุ)
           หรือโหลดไฟล์ <code>.json</code> ของโรงพยาบาลเองเข้ามา</li>
-      <li><b>ยืนยัน / override พร้อมเหตุผล</b> → เกิด audit trail และสรุปอัตราการแก้ระดับ (ดันขึ้น/ลดลง)</li>
+      <li><b>ยืนยัน / override พร้อมเหตุผล</b> → บันทึกผู้บันทึกและเวลา และสรุปอัตราการแก้ระดับ (ดันขึ้น/ลดลง) · เก็บผลล่าสุด ยังไม่เก็บประวัติการแก้ซ้ำ</li>
       <li><b>ตารางเคส + ส่งออก CSV</b> (UTF-8 BOM เปิดใน Excel ภาษาไทยไม่เพี้ยน)</li>
       <li><b>Known-Answer Test ในตัว 29 เคส</b> — รวมตัวอย่างที่คู่มือเฉลยไว้เอง</li>
     </ul>
@@ -81,7 +82,7 @@
     <h2>ไฟล์ในโปรเจกต์</h2>
     <ul>
       <li><code>P49-triage.html</code> — ตัวแอป</li>
-      <li><code>engine.js</code> — criteria engine (ไม่มีเกณฑ์ฝังอยู่เลย รับเกณฑ์เป็นข้อมูล)</li>
+      <li><code>engine.js</code> — criteria engine รับเกณฑ์เป็นข้อมูล ยกเว้นสูตรจุดตัด shock ตามอายุจาก PMK-WND-037 ที่ชุดฉบับโรงพยาบาลเรียกใช้</li>
       <li><code>criteria-moph-2561.json</code> · <code>criteria-moph-2561-local.json</code> — ชุดเกณฑ์</li>
       <li><code>kat-cases.js</code> — ชุดทดสอบ 29 เคส (ใช้ร่วมกันทั้งในแอปและใน <code>node test-engine.js</code>)</li>
       <li><code>test-engine.js</code> — ชุดตรวจ 58 ข้อ รันด้วย Node</li>
@@ -111,16 +112,48 @@
     <p class="kv"><b>ความปลอดภัยหลายชั้น:</b> Supabase Auth → RBAC จากคอลัมน์ role ใน <code>profiles</code>
       → validation ทั้งฝั่งหน้าเว็บและ CHECK constraint → <b>RLS ทุกตาราง</b> เทียบ <code>auth.uid()</code> กับเจ้าของแถว</p>
     <p class="kv"><b>กุญแจ:</b> ค่าเชื่อมต่ออยู่ใน <code>supabase-config.js</code> ในรีโป — เป็น anon/publishable
-      key ที่ออกแบบให้เปิดเผยฝั่ง client ได้ และปลอดภัยเพราะเปิด RLS ครบทุกตาราง (ยังไม่ล็อกอิน = อ่านไม่ได้เลย)
+      key ที่ออกแบบให้เปิดเผยฝั่ง client ได้ เพราะเปิด RLS ครบทุกตาราง (ยังไม่ล็อกอิน = อ่านไม่ได้เลย) · สิทธิ์ของผู้ที่ล็อกอินกำลังปรับให้เข้มขึ้น
       · <code>service_role</code> key ไม่อยู่ในรีโปและห้ามใช้ฝั่งหน้าเว็บ · หน้าเว็บสาธารณะนี้จึงสาธิต CRUD
       บนฐานข้อมูลจริงได้เมื่อเข้าสู่ระบบ</p>
     <a class="btn sec" href="supabase-w6-additions.sql">🔐 supabase-w6-additions.sql</a>
   </div>
 
+  <div class="card">
+    <h2>ข้อมูลส่วนบุคคลและความยินยอม</h2>
+    <p class="kv"><b>ไม่ล็อกอิน:</b> เคสอยู่ใน localStorage ของเบราว์เซอร์เครื่องนั้นเท่านั้น</p>
+    <p class="kv"><b>ล็อกอิน:</b> แอปจะส่งเคสเข้า Supabase ภูมิภาค Singapore เมื่อผู้ใช้อ่านข้อมูลที่เก็บ
+      ติ๊กยินยอมข้อ 1–2 และตอบคำถามตรวจความเข้าใจแล้ว · ข้อ 3–4 เลือกได้ ให้หรือถอนด้วยคลิกเดียว
+      · ถอนข้อ 1–2 ด้วยปุ่มเดียวแล้วออกจากระบบ · บันทึกเวอร์ชันและเวลาของการให้หรือถอน 10 ครั้งล่าสุดไว้กับบัญชี
+      · ตัวกั้นนี้อยู่ที่หน้าแอป ฐานข้อมูลยังไม่ตรวจความยินยอมเอง</p>
+    <p class="kv"><b>ผู้รับผิดชอบ:</b> นพ.กิตติพศ เกียรติพัฒนาชัย ผู้พัฒนา · ขอลบบัญชีหรือแจ้งเหตุผ่าน
+      <a href="https://github.com/mikeysi124/ccme-vibecode-w5/issues">GitHub Issues</a> โดยไม่ใส่ข้อมูลส่วนบุคคล</p>
+    <a class="btn sec" href="docs/privacy-policy-consent-v1.0.pdf">🔏 นโยบายความเป็นส่วนตัว + แบบขอความยินยอม (PDF)</a>
+  </div>
+
+  <div class="card">
+    <h2>เอกสารโครงการ</h2>
+    <ul>
+      <li><a href="https://github.com/mikeysi124/ccme-vibecode-w5#readme">README</a> — สรุป 1 หน้า</li>
+      <li><a href="https://github.com/mikeysi124/ccme-vibecode-w5/blob/main/docs/TECHNICAL.md">docs/TECHNICAL.md</a> — สถาปัตยกรรม เกณฑ์ ฐานข้อมูล</li>
+      <li><a href="https://github.com/mikeysi124/ccme-vibecode-w5/blob/main/docs/PRODUCTION-PLAN.md">docs/PRODUCTION-PLAN.md</a> — ถ้าจะใช้จริงต้องเปลี่ยนอะไร + แผนรับมือแพลตฟอร์มล่ม</li>
+      <li><a href="https://github.com/mikeysi124/ccme-vibecode-w5/blob/main/docs/DEVLOG.md">docs/DEVLOG.md</a> — บันทึกการพัฒนาแบบ PDCA</li>
+      <li><a href="https://github.com/mikeysi124/ccme-vibecode-w5/blob/main/docs/W7-CHECKLIST.md">docs/W7-CHECKLIST.md</a> — เช็คลิสต์ 43 ข้อของวิชา 7 พร้อมหลักฐาน</li>
+    </ul>
+  </div>
+
+  <div class="card" id="versions">
+    <h2>ประวัติเวอร์ชัน</h2>
+    <ul>
+      <li><b>1.2.0 · 23 ก.ย. 2569</b> — แจ้งข้อมูลที่เก็บ + แบบขอความยินยอม v1.0 ก่อนล็อกอิน ไม่บันทึกลงฐานข้อมูลถ้ายังไม่ยินยอม · เลขเวอร์ชันบนหน้าแอป · README 1 หน้า + เอกสารใน docs/</li>
+      <li><b>1.1.0 · 12 ก.ย. 2569</b> — เชื่อม Supabase ครบ CRUD สี่คำสั่ง + RLS ทุกตาราง (วิชา 5 Part 2)</li>
+      <li><b>1.0.0 · 3 ก.ย. 2569</b> — Clinical App Mini-Project: criteria engine + ชุดเกณฑ์ 2 ฉบับ + ชุดทดสอบ (วิชา 4)</li>
+    </ul>
+  </div>
+
   <p class="disc">
     ⚠️ เครื่องมือสาธิตเพื่อการเรียนการสอนเท่านั้น ใช้สถานการณ์จำลองทั้งหมด ไม่มีข้อมูลผู้ป่วยจริง
     ไม่เก็บชื่อ / HN / เลขบัตรประชาชน · ไม่ใช่เครื่องมือแพทย์ ยังไม่ผ่านการตรวจสอบความแม่นยำทางคลินิก
-    และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · เคสที่บันทึกก่อนเข้าสู่ระบบอยู่ใน localStorage ของเบราว์เซอร์เครื่องผู้ใช้ · เมื่อเข้าสู่ระบบแล้วจะบันทึกลงฐานข้อมูล Supabase ของผู้พัฒนา (ap-southeast-1) และเห็นได้เฉพาะแถวที่ตนมีสิทธิ์ตาม Row Level Security
+    และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · เคสที่บันทึกก่อนเข้าสู่ระบบหรือก่อนให้ความยินยอมอยู่ใน localStorage ของเบราว์เซอร์เครื่องผู้ใช้ · เมื่อเข้าสู่ระบบและให้ความยินยอมแล้วจะบันทึกลงฐานข้อมูล Supabase ของผู้พัฒนา (ap-southeast-1) และเห็นได้เฉพาะแถวที่ตนมีสิทธิ์ตาม Row Level Security
   </p>
 </div>
 </body>

@@ -46,8 +46,11 @@
       .then(fail).then(function () { return ensureProfile(); });
   }
 
-  function signUp(email, password, fullName, unit) {
-    return need().auth.signUp({ email: email, password: password }).then(fail)
+  /* consent = คำตอบแบบขอความยินยอม v1.0 เก็บใน user_metadata ของบัญชีตั้งแต่ตอนสมัคร */
+  function signUp(email, password, fullName, unit, consent) {
+    return need().auth.signUp({ email: email, password: password,
+                                options: { data: { consent: consent || null,
+                                                   consent_log: consent ? [consent] : [] } } }).then(fail)
       .then(function (data) {
         /* ถ้าโปรเจกต์เปิดยืนยันอีเมล จะยังไม่มี session — ต้องยืนยันก่อนแล้วค่อยล็อกอิน */
         if (!data.session) return { pending_email_confirm: true };
@@ -55,14 +58,27 @@
       });
   }
 
-  function signOut() { setCache = {}; return need().auth.signOut(); }
+  /* signOut ของ SDK คืน { error } แทนการ throw และถ้า error จะยังไม่ลบ session → ต้องตรวจเอง */
+  function signOut() {
+    setCache = {};
+    return need().auth.signOut().then(function (r) { if (r && r.error) throw new Error(r.error.message); });
+  }
+
+  /* บันทึกความยินยอมล่าสุด + ประวัติการให้/ถอน ของบัญชีที่ล็อกอินอยู่ · คืน user ตัวล่าสุด */
+  function saveConsent(consent, log) {
+    return need().auth.updateUser({ data: { consent: consent, consent_log: log || [consent] } }).then(fail)
+      .then(function (data) { return data.user; });
+  }
 
   /* แถวใน profiles ต้องมีก่อน เพราะ cases.created_by อ้าง profiles ไม่ใช่ auth.users */
   function ensureProfile(fullName, unit) {
     return getUser().then(function (u) {
       if (!u) throw new Error('ยังไม่ได้เข้าสู่ระบบ');
+      /* ไม่ส่ง unit ถ้าไม่ได้ระบุ ไม่งั้นทุกครั้งที่ล็อกอินจะล้างหน่วยงานที่ผู้ดูแลตั้งไว้เป็นค่าว่าง */
+      var row = { id: u.id, full_name: fullName || u.email };
+      if (unit) row.unit = unit;
       return need().from('profiles')
-        .upsert({ id: u.id, full_name: fullName || u.email, unit: unit || null }, { onConflict: 'id' })
+        .upsert(row, { onConflict: 'id' })
         .select().single().then(fail);
     });
   }
@@ -88,11 +104,13 @@
   function num(v) { return v === '' || v === null || v === undefined ? null : Number(v); }
 
   /* --------------------------------------------------------------- POST */
-  /* d = ข้อมูลที่ผ่าน validate แล้ว · r = ผลจาก engine · ovr = {level, reason, note} หรือ null */
-  function saveAssessment(d, r, ovr) {
+  /* d = ข้อมูลที่ผ่าน validate แล้ว · r = ผลจาก engine · ovr = {level, reason, note} หรือ null
+     expectId = id บัญชีที่หน้าแอปตรวจความยินยอมแล้ว ถ้า session เปลี่ยนไประหว่างนั้นจะไม่บันทึก */
+  function saveAssessment(d, r, ovr, expectId) {
     var c = need(), user, info, caseRow, asmRow;
     return getUser().then(function (u) {
       if (!u) throw new Error('ยังไม่ได้เข้าสู่ระบบ');
+      if (expectId && u.id !== expectId) throw new Error('บัญชีเปลี่ยนระหว่างบันทึก เคสยังไม่ถูกบันทึก');
       user = u;
       return setInfo(r.set_id);
     }).then(function (i) {
@@ -206,7 +224,7 @@
   root.TriageDB = {
     get enabled() { return !!ready(); },
     getUser: getUser, signIn: signIn, signUp: signUp, signOut: signOut,
-    ensureProfile: ensureProfile,
+    saveConsent: saveConsent, ensureProfile: ensureProfile,
     saveAssessment: saveAssessment, listAssessments: listAssessments,
     updateOverride: updateOverride, deleteCase: deleteCase
   };
