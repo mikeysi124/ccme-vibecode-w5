@@ -100,13 +100,13 @@ begin
     update public.profiles set role = 'admin' where id = uid;
     get diagnostics n = row_count;
     res := res || case when n = 0 then 'FAIL ไม่เห็นแถวของตัวเอง | ' else 'FAIL เปลี่ยน role ได้ | ' end;
-  exception when others then res := res || 'PASS กัน role | ';
+  exception when others then res := res || case when sqlerrm like 'เปลี่ยนบทบาทหรือหน่วยงาน%' then 'PASS กัน role | ' else 'FAIL error อื่น: ' || sqlerrm || ' | ' end;
   end;
   begin
     update public.profiles set unit = 'TEST-UNIT' where id = uid;
     get diagnostics n = row_count;
     res := res || case when n = 0 then 'FAIL ไม่เห็นแถวของตัวเอง | ' else 'FAIL เปลี่ยน unit ได้ | ' end;
-  exception when others then res := res || 'PASS กัน unit | ';
+  exception when others then res := res || case when sqlerrm like 'เปลี่ยนบทบาทหรือหน่วยงาน%' then 'PASS กัน unit | ' else 'FAIL error อื่น: ' || sqlerrm || ' | ' end;
   end;
   begin
     update public.profiles set full_name = 'ชื่อทดสอบ' where id = uid;

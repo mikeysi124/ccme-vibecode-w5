@@ -105,12 +105,15 @@
 
   /* --------------------------------------------------------------- POST */
   /* d = ข้อมูลที่ผ่าน validate แล้ว · r = ผลจาก engine · ovr = {level, reason, note} หรือ null
-     expectId = id บัญชีที่หน้าแอปตรวจความยินยอมแล้ว ถ้า session เปลี่ยนไประหว่างนั้นจะไม่บันทึก */
-  function saveAssessment(d, r, ovr, expectId) {
+     expectId = id บัญชีที่หน้าแอปตรวจความยินยอมแล้ว ถ้า session เปลี่ยนไประหว่างนั้นจะไม่บันทึก
+     allowed(user) = ตรวจความยินยอมล่าสุดของบัญชีจากเซิร์ฟเวอร์อีกครั้งก่อน insert
+     ponytail: ยังไม่ atomic ถอนความยินยอมจากอีกแท็บในช่วงสั้น ๆ ก่อน insert ยังหลุดได้ · แก้จริง = ให้ RLS ของ cases ตรวจ consent */
+  function saveAssessment(d, r, ovr, expectId, allowed) {
     var c = need(), user, info, caseRow, asmRow;
     return getUser().then(function (u) {
       if (!u) throw new Error('ยังไม่ได้เข้าสู่ระบบ');
       if (expectId && u.id !== expectId) throw new Error('บัญชีเปลี่ยนระหว่างบันทึก เคสยังไม่ถูกบันทึก');
+      if (allowed && !allowed(u)) throw new Error('บัญชีนี้ไม่มีความยินยอมที่ใช้ได้แล้ว เคสยังไม่ถูกบันทึก');
       user = u;
       return setInfo(r.set_id);
     }).then(function (i) {

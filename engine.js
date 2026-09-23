@@ -85,7 +85,8 @@
       var row = { code: c.code, dp: c.dp, group: c.group || '', text: c.text,
                   page: c.page || null, danger_zone: !!c.danger_zone,
                   nurse_judgment: !!c.nurse_judgment, advisory_only: !!c.advisory_only,
-                  note: c.note || '', observed: describe(c.test, data) };
+                  note: c.note || '', local_addition: !!c.local_addition, source: c.source || '',
+                  observed: describe(c.test, data) };
       var r = evalTest(c.test, data);
       if (r === true) { (c.advisory_only ? advisories : matched).push(row); }
       else if (r === false) unmatched.push(row);

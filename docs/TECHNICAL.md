@@ -110,7 +110,7 @@ node gen-criteria-js.js      # รันใหม่ทุกครั้งท�
 |---|---|
 | วิชา 5 Part 2 (6 ก.ย.) | ✅ **เชื่อม Supabase แล้ว** — ERD [`W5-ER-Diagram-Kittipot.pdf`](../W5-ER-Diagram-Kittipot.pdf) · DDL+RLS+seed [`supabase-schema.sql`](../supabase-schema.sql) · policy update/delete + trigger profiles [`supabase-w6-additions.sql`](../supabase-w6-additions.sql) · ชั้นข้อมูล [`supabase-data.js`](../supabase-data.js) |
 | วิชา 6 | ✅ Ethics Impact Assessment · Security audit · Privacy policy + แบบขอความยินยอม [`privacy-policy-consent-v1.0.pdf`](privacy-policy-consent-v1.0.pdf) |
-| วิชา 7 | ✅ เวอร์ชัน 1.2.0: แบบขอความยินยอมในแอป · เลขเวอร์ชัน · เอกสาร [PRODUCTION-PLAN](PRODUCTION-PLAN.md) · [DEVLOG](DEVLOG.md) · [W7-CHECKLIST](W7-CHECKLIST.md) |
+| วิชา 7 | ✅ เวอร์ชัน 1.2.1: แบบขอความยินยอมในแอป · แก้ตามผลตรวจ Codex รอบ 3 · เลขเวอร์ชัน · เอกสาร [PRODUCTION-PLAN](PRODUCTION-PLAN.md) · [DEVLOG](DEVLOG.md) · [W7-CHECKLIST](W7-CHECKLIST.md) |
 | หลัง Demo Day | UAT กับพยาบาลคัดกรอง ≥ 3 คน — วัดเวลาต่อราย และอัตรา/เหตุผลการ override |
 
 ## Backend (วิชา 5 Part 2)

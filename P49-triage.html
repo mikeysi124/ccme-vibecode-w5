@@ -104,7 +104,7 @@
 <header>
   <h1>ผู้ช่วยคัดกรองช่องทาง ER/OPD</h1>
   <p>เสนอระดับความเร่งด่วนและช่องทาง พร้อมแสดง<b>ข้อเกณฑ์ที่เข้าเป็นรายข้อ</b> · พยาบาลเป็นผู้ตัดสินสุดท้ายเสมอ<br>
-     นพ.กิตติพศ เกียรติพัฒนาชัย (P49) · <b>เวอร์ชัน 1.2.0</b> · <a href="./#versions">ประวัติเวอร์ชัน</a></p>
+     นพ.กิตติพศ เกียรติพัฒนาชัย (P49) · <b>เวอร์ชัน 1.2.1</b> · <a href="./#versions">ประวัติเวอร์ชัน</a></p>
 </header>
 
 <div class="tabs" role="tablist">
@@ -290,18 +290,18 @@
 
 <p class="disc" style="text-align:center">
   เครื่องมือสาธิตเพื่อการเรียนการสอน ใช้ข้อมูลจำลองทั้งหมด · ไม่ใช่เครื่องมือแพทย์
-  และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · เวอร์ชัน 1.2.0 (23 ก.ย. 2569)
+  และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · เวอร์ชัน 1.2.1 (23 ก.ย. 2569)
 </p>
 </div>
 
-<script src="engine.js?v=20260903a"></script>
+<script src="engine.js?v=20260923b"></script>
 <script src="criteria-moph-2561.js?v=20260903a"></script>
 <script src="criteria-moph-2561-local.js?v=20260903a"></script>
 <script src="kat-cases.js?v=20260903a"></script>
 <!-- วิชา 5 Part 2 — Supabase (ถ้าไม่มี supabase-config.js แอปจะใช้ localStorage เหมือนเดิม) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="supabase-config.js?v=20260912a" onerror="window.SUPA_CONFIG=null"></script>
-<script src="supabase-data.js?v=20260923a"></script>
+<script src="supabase-data.js?v=20260923b"></script>
 <script>
 'use strict';
 var E = TriageEngine, SETS = window.CRITERIA_SETS, KEY = 'p49-triage-cases-v1';
@@ -320,6 +320,9 @@ Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function
     window.scrollTo(0, 0);
   });
 });
+/* เปิดแท็บตามลิงก์ เช่น P49-triage.html#test */
+Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function(b){
+  if (location.hash === '#' + b.dataset.tab) b.click(); });
 
 /* ------------------------------------------------ สร้างช่องติ๊กจากชุดเกณฑ์
  * ไม่มี list ของธงฝังอยู่ในหน้า — ดึงจากตัวชุดเกณฑ์ทั้งหมด
@@ -405,7 +408,9 @@ function readForm(){
 /* --------------------------------------------------------------- ประเมิน */
 function critLine(x, showPage){
   return '<div class="ci"><code>' + esc(x.code) + '</code>' + esc(x.text) +
-    (showPage && x.page ? ' <span class="pg">(คู่มือหน้า ' + x.page + ')</span>' : '') +
+    (!showPage ? '' : x.local_addition
+      ? ' <span class="pg">(ส่วนขยาย รพ. · ' + esc((x.source.match(/PMK-[A-Z]+-\d+/) || ['ดูที่มาในแท็บชุดเกณฑ์'])[0]) + ')</span>'
+      : x.page ? ' <span class="pg">(คู่มือหน้า ' + x.page + ')</span>' : '') +
     '<span class="obs">' + esc(x.observed) + '</span></div>';
 }
 $('go').addEventListener('click', function(){
@@ -480,7 +485,7 @@ function saveCase(isOverride){
   }
   if (dbOn()){
     var ovr = (isOverride && lvl !== r.level) ? { level: lvl, reason: reason, note: note } : null;
-    /* ตรวจความยินยอมกับบัญชีที่ใช้อยู่จริงอีกครั้ง แล้วผูกการบันทึกกับบัญชีนั้น กันกรณีสลับบัญชีจากแท็บอื่น */
+    /* ตรวจความยินยอมกับบัญชีที่ใช้อยู่จริงอีกครั้ง แล้วผูกการบันทึกกับบัญชีนั้น กันกรณีสลับบัญชีจากแท็บอื่น · ชั้นข้อมูลตรวจซ้ำก่อน insert */
     var expectId = dbUser && dbUser.id;
     TriageDB.getUser().then(function(u){
       if (!u || u.id !== expectId || !consentOf(u)){
@@ -488,7 +493,7 @@ function saveCase(isOverride){
         throw new Error(u && u.id !== expectId ? 'บัญชีถูกเปลี่ยนจากแท็บอื่น เคสยังไม่ถูกบันทึก ตรวจชื่อบัญชีแล้วกดใหม่'
                                               : 'บัญชีนี้ยังไม่มีบันทึกความยินยอม เคสยังไม่ถูกบันทึก');
       }
-      return TriageDB.saveAssessment(d, r, ovr, u.id);
+      return TriageDB.saveAssessment(d, r, ovr, u.id, consentOf);
     }).then(function(){
       refreshCases(); savedMsg(lvl, isOverride, r.level, ' · เก็บลงฐานข้อมูลแล้ว');
     }).catch(function(e){
@@ -720,14 +725,17 @@ function syncConsentUi(){
     ? 'ระบบเป็นแค่ผู้เสนอ ผู้คัดกรองเป็นผู้ตัดสินสุดท้ายเสมอ'
     : (ok ? '' : 'ติ๊กข้อ 1–2 และตอบคำถามก่อน จึงจะเข้าสู่ระบบได้');
 }
-/* บันทึกทีละคำขอ และสร้างค่าใหม่จากข้อมูลบัญชีล่าสุดเสมอ กันคำขอซ้อนทับกันหรือเขียนข้ามบัญชี
- * make(ค่าความยินยอมล่าสุดของบัญชี) คืนค่าที่จะบันทึก · คืน null = ยกเลิก */
+/* บันทึกทีละคำขอภายในแท็บนี้ และสร้างค่าใหม่จากข้อมูลบัญชีล่าสุดเสมอ
+ * แต่ละคำขอผูกกับบัญชีตอนกด ถ้าบัญชีเปลี่ยนก่อนถึงคิว คำขอของบัญชีเดิมตกทั้งหมด ไม่เขียนลงบัญชีใหม่
+ * make(ค่าความยินยอมล่าสุดของบัญชี) คืนค่าที่จะบันทึก · คืน null = ยกเลิก
+ * ponytail: คิวอยู่ในแท็บเดียว สองแท็บที่บันทึกพร้อมกันยังเขียนทับกันได้ · แก้จริง = ตาราง consent แบบเพิ่มอย่างเดียวในฐานข้อมูล */
 var consentQueue = Promise.resolve();
 function recordConsent(make){
+  var expectId = dbUser && dbUser.id;
   var run = consentQueue.then(function(){
     return TriageDB.getUser().then(function(u){
       if (!u) throw new Error('ยังไม่ได้เข้าสู่ระบบ');
-      if (dbUser && dbUser.id && u.id !== dbUser.id){ dbUser = u; throw new Error('บัญชีถูกเปลี่ยนจากแท็บอื่น ตรวจชื่อบัญชีแล้วลองใหม่'); }
+      if (!expectId || u.id !== expectId){ dbUser = u; throw new Error('บัญชีถูกเปลี่ยนจากแท็บอื่น ตรวจชื่อบัญชีแล้วลองใหม่'); }
       var meta = u.user_metadata || {}, c = make(meta.consent || null);
       if (!c) throw new Error('ความยินยอมของบัญชีนี้เปลี่ยนไปแล้ว ตรวจสถานะแล้วลองใหม่');
       var log = (Array.isArray(meta.consent_log) ? meta.consent_log : []).concat([c]).slice(-CONSENT_LOG_MAX);
