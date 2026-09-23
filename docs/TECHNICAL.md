@@ -133,7 +133,7 @@ node gen-criteria-js.js      # รันใหม่ทุกครั้งท�
 เพราะอนุมานกลับได้จากชุดเกณฑ์เวอร์ชันเดียวกันที่ตรึงไว้ในแถว `assessments`
 
 **กุญแจ:** ค่าเชื่อมต่ออยู่ใน `supabase-config.js` ซึ่ง **commit ไว้ในรีโป** — เป็น anon/publishable key
-ที่ออกแบบให้เปิดเผยฝั่ง client ได้ เพราะเปิด RLS ครบทุกตาราง (curl ด้วย anon key ตอนยังไม่ล็อกอินได้ `[]`) · ผลนี้ไม่ได้พิสูจน์สิทธิ์ของผู้ที่ล็อกอิน ซึ่งกำลังปรับให้เข้มขึ้น ดู [PRODUCTION-PLAN](PRODUCTION-PLAN.md)
+ที่ออกแบบให้เปิดเผยฝั่ง client ได้ เพราะเปิด RLS ครบทุกตาราง (curl ด้วย anon key ตอนยังไม่ล็อกอินได้ `[]`) · ผลนี้พิสูจน์แค่ผู้ที่ไม่ล็อกอิน · สิทธิ์ของผู้ที่ล็อกอินทดสอบแยกด้วยส่วนที่ 5 ของ [`supabase-w7-hardening.sql`](../supabase-w7-hardening.sql) ผ่าน 5 ข้อเมื่อ 23 ก.ย.
 หน้าเว็บสาธารณะบน GitHub Pages จึงสาธิต CRUD บนฐานข้อมูลจริงได้ · `service_role` key ไม่อยู่ในรีโปและห้ามใช้ฝั่งหน้าเว็บ
 
 ```bash
@@ -142,6 +142,7 @@ cp supabase-config.example.js supabase-config.js   # ใส่ Project URL + ano
 # แล้วรันใน Supabase SQL Editor ตามลำดับ
 #   1) supabase-schema.sql          ตาราง + RLS policy + seed เกณฑ์ 2 ชุด
 #   2) supabase-w6-additions.sql    policy update/delete + trigger สร้าง profiles
+#   3) supabase-w7-hardening.sql    กันแก้บทบาท/หน่วยงาน + policy อ่านตามหน่วย (ส่วน 5 = ชุดทดสอบ รันแยก)
 ```
 
 ## ข้อจำกัดและความปลอดภัย
