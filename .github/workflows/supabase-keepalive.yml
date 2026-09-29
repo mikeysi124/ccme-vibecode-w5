@@ -1,0 +1,24 @@
+# Keep-alive: Supabase free tier pause โปรเจกต์ที่ user database activity ต่ำใน 7 วัน
+# ccme-triage-p49 โดน pause 19 ก.ย. 2569 และได้เมลเตือนอีกรอบ 29 ก.ย. — docs free-project-pausing นับ API calls เป็น activity
+# ยิง select ตารางที่แอปใช้ 7 ตาราง วันละ 2 รอบ ด้วย anon key จาก supabase-config.js (อ่านอย่างเดียว · RLS คืน [])
+# ได้รหัสที่ไม่ใช่ 2xx = job ล้ม GitHub ส่งเมลแจ้ง → เปิด dashboard กด Resume project
+# ponytail: GitHub ปิด cron เองถ้า repo เงียบ 60 วัน — ดู Actions tab · เลิกใช้แอปแล้วลบไฟล์นี้ทิ้งได้
+name: supabase-keepalive
+on:
+  schedule:
+    - cron: '43 1,13 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          url=$(grep -o "https://[a-z0-9]*\.supabase\.co" supabase-config.js)
+          key=$(grep -o "eyJ[A-Za-z0-9_.-]*" supabase-config.js)
+          for t in criteria_sets criteria assessment_criteria cases assessments overrides profiles; do
+            curl -sS --fail -m 30 -o /dev/null -w "$t %{http_code}\n" \
+              "$url/rest/v1/$t?select=*&limit=1" -H "apikey: $key" -H "Authorization: Bearer $key"
+          done
