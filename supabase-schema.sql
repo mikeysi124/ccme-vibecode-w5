@@ -26,7 +26,7 @@ create table public.profiles (
 
 -- ----------------------------------------------------------- 2. criteria_sets
 -- ชุดเกณฑ์ 1 เวอร์ชัน · parent_set_id อ้างตารางตัวเอง ทำให้ "ฉบับโรงพยาบาล"
--- ชี้กลับไปยังฉบับคู่มือที่ต่อยอดมาได้ (คู่มือหน้า 12 เปิดให้ รพ. นิยามเพิ่มเอง)
+-- ชี้กลับไปยังฉบับคู่มือที่ต่อยอดมาได้ (คู่มือหน้า 9 เปิดให้ รพ. นิยามเพิ่มเอง)
 create table public.criteria_sets (
   id              uuid primary key default gen_random_uuid(),
   name            text not null,
@@ -45,7 +45,7 @@ create table public.criteria (
   id              uuid primary key default gen_random_uuid(),
   criteria_set_id uuid not null references public.criteria_sets (id) on delete cascade,
   code            text not null,                     -- 'A1','B10','D7' → text (nominal)
-  decision_point  char(1) not null check (decision_point in ('A','B','C','D')),
+  decision_point  char(1) not null check (decision_point in ('A','B','C','D','P')),  -- P เพิ่มใน 1.3.0
   group_name      text,                              -- ภาวะเสี่ยง / ภาวะซึม / ภาวะปวด
   description     text not null,
   manual_page     smallint,                          -- เลขหน้าในคู่มือ ตรวจย้อนได้
@@ -61,7 +61,7 @@ create table public.criteria (
 
 -- ---------------------------------------------------------- 4. resource_types
 -- รายการกิจกรรมของแต่ละชุดเกณฑ์ · is_counted แยก "กิจกรรมที่นับ / ไม่นับ"
--- ตามคู่มือหน้า 13–14 — ติ๊กของที่ไม่นับกี่อย่างก็ไม่เพิ่ม resource_count
+-- ตามคู่มือหน้า 10–11 — ติ๊กของที่ไม่นับกี่อย่างก็ไม่เพิ่ม resource_count
 create table public.resource_types (
   id              uuid primary key default gen_random_uuid(),
   criteria_set_id uuid not null references public.criteria_sets (id) on delete cascade,

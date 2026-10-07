@@ -104,7 +104,7 @@
 <header>
   <h1>ผู้ช่วยคัดกรองช่องทาง ER/OPD</h1>
   <p>เสนอระดับความเร่งด่วนและช่องทาง พร้อมแสดง<b>ข้อเกณฑ์ที่เข้าเป็นรายข้อ</b> · พยาบาลเป็นผู้ตัดสินสุดท้ายเสมอ<br>
-     นพ.กิตติพศ เกียรติพัฒนาชัย (P49) · <b>เวอร์ชัน 1.2.1</b> · <a href="./#versions">ประวัติเวอร์ชัน</a></p>
+     นพ.กิตติพศ เกียรติพัฒนาชัย (P49) · <b>เวอร์ชัน 1.3.0</b> · <a href="./#versions">ประวัติเวอร์ชัน</a></p>
 </header>
 
 <div class="tabs" role="tablist">
@@ -290,7 +290,7 @@
 
 <p class="disc" style="text-align:center">
   เครื่องมือสาธิตเพื่อการเรียนการสอน ใช้ข้อมูลจำลองทั้งหมด · ไม่ใช่เครื่องมือแพทย์
-  และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · เวอร์ชัน 1.2.1 (23 ก.ย. 2569)
+  และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · เวอร์ชัน 1.3.0 (7 ต.ค. 2569)
 </p>
 </div>
 
@@ -411,7 +411,8 @@ function critLine(x, showPage){
     (!showPage ? '' : x.local_addition
       ? ' <span class="pg">(ส่วนขยาย รพ. · ' + esc((x.source.match(/PMK-[A-Z]+-\d+/) || ['ดูที่มาในแท็บชุดเกณฑ์'])[0]) + ')</span>'
       : x.page ? ' <span class="pg">(คู่มือหน้า ' + x.page + ')</span>' : '') +
-    '<span class="obs">' + esc(x.observed) + '</span></div>';
+    '<span class="obs">' + esc(x.observed) + '</span>' +
+    (x.note ? '<span class="obs">หมายเหตุ: ' + esc(x.note) + '</span>' : '') + '</div>';
 }
 $('go').addEventListener('click', function(){
   var raw = readForm(), v = E.validate(raw), m = $('msg');
@@ -611,7 +612,7 @@ function renderCriteria(){
     (m.not_transcribed ? '<p class="disc">⚠ ' + esc(m.not_transcribed) + '</p>' : '');
 
   var dps = m.decision_points || {}, html = '';
-  ['A','B','C','D'].forEach(function(dp){
+  ['A','B','C','D','P'].forEach(function(dp){
     var list = SET.criteria.filter(function(c){ return c.dp === dp; });
     if (dp === 'C'){
       var r = SET.resources || {};

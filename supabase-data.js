@@ -13,7 +13,7 @@
   var cfg = root.SUPA_CONFIG || null;
   var sb = null;
   var setCache = {};                 // engineSetId → { setId, byCode: {code → criterionId} }
-  var ENGINE_VERSION = 'p49-triage-1.0';
+  var ENGINE_VERSION = 'p49-triage-1.3';
   var VERSION_OF = {                 // meta.id ของชุดเกณฑ์ฝั่งแอป → คอลัมน์ version ในฐานข้อมูล
     'moph-ed-triage-2561': '2561',
     'moph-ed-triage-2561-local': '2561-local'
@@ -118,6 +118,14 @@
       return setInfo(r.set_id);
     }).then(function (i) {
       info = i;
+      /* รหัสเกณฑ์ที่ฐานข้อมูลยังไม่รู้จัก เช่นข้อ P ก่อนรัน supabase-w8-pediatric.sql ต้องหยุดก่อน insert ไม่ทิ้งหลักฐานเงียบ */
+      var missing = (r.matched || []).concat(r.blocking_unknown || [])
+        .map(function (x) { return x.code; })
+        .filter(function (code) { return !info.byCode[code]; });
+      if (missing.length) {
+        delete setCache[r.set_id];   // รัน migration แล้วกดบันทึกใหม่ต้องโหลดรายการเกณฑ์ใหม่ ไม่ใช้ cache เดิม
+        throw new Error('ฐานข้อมูลยังไม่มีเกณฑ์ ' + missing.join(', ') + ' ต้องรัน supabase-w8-pediatric.sql แล้วกดบันทึกใหม่ เคสยังไม่ถูกบันทึก');
+      }
       var now = new Date();
       return c.from('cases').insert({
         case_code: 'C' + now.toISOString().replace(/[-:TZ.]/g, '').slice(0, 14) +

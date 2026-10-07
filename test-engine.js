@@ -52,6 +52,8 @@ expect('ไม่ได้วัดชีพจร/อัตราหายใ�
   !rU.unmatched.some(function (x) { return x.code === 'D7'; }));
 expect('ข้อที่ตัดสินไม่ได้ ณ จุดที่ใช้ตัดสินจริง ต้องถูกยกมาเตือน (blocking_unknown)',
   rU.blocking_unknown.some(function (x) { return x.code === 'D7'; }));
+expect('ยังไม่ได้วัดชีพจร → เหตุผลต้องบอกว่ายังตัดสินไม่ได้ ห้ามบอกว่าสัญญาณชีพไม่อยู่ในช่วงอันตราย',
+  rU.reason.indexOf('ตัดสินไม่ได้') !== -1 && rU.reason.indexOf('และสัญญาณชีพไม่อยู่ในช่วงอันตราย') === -1);
 
 /* ------------------------- 3) advisory: เตือนได้ แต่ห้ามเปลี่ยนระดับเอง */
 var infant = E.validate({ cc: 'ไข้', age_value: 18, age_unit: 'month', hr: 130, rr: 30,
@@ -62,6 +64,59 @@ expect('เด็ก < 3 ปี → ขึ้นคำเตือนเรื�
   rA.advisories.some(function (x) { return x.code === 'D10'; }));
 expect('advisory ต้องไม่ดันระดับเอง — เคสนี้ยังเป็นระดับ 3',
   rA.level === 3 && rA.matched.every(function (m) { return m.code !== 'D10'; }));
+
+/* ------------------------- 3b) ข้อพิจารณาผู้ป่วยเด็ก P1–P3: ดันระดับขึ้นได้อย่างเดียว */
+var adultFever = E.assess(E.validate({ cc: 'ไข้', age_value: 30, age_unit: 'year', hr: 96, rr: 20, spo2: 98,
+  sbp: 120, dbp: 76, gcs: 15, temp_c: 39.5, pain_score: 0, flags: [], resources: [] }).data, SET);
+expect('ผู้ใหญ่ไข้ 39.5 °C → ไม่เข้าข้อ P ใด ๆ ยังเป็นระดับ 5',
+  adultFever.level === 5 && adultFever.matched.every(function (m) { return m.dp !== 'P'; }) &&
+  adultFever.advisories.every(function (a) { return a.dp !== 'P'; }));
+var childNoTemp = E.assess(E.validate({ cc: 'ไข้', age_value: 2, age_unit: 'year', hr: 120, rr: 30, spo2: 98,
+  sbp: 95, dbp: 60, gcs: 15, pain_score: 0, flags: [], resources: [] }).data, SET);
+expect('เด็ก 2 ปีไม่ได้วัดอุณหภูมิ → P3 อยู่ในกลุ่มตัดสินไม่ได้และถูกยกมาเตือน',
+  childNoTemp.blocking_unknown.some(function (x) { return x.code === 'P3'; }));
+var infantLv1 = E.assess(E.validate({ cc: 'ไข้ หอบ', age_value: 2, age_unit: 'month', hr: 150, rr: 40, spo2: 88,
+  sbp: 90, dbp: 55, gcs: 15, temp_c: 38.5, pain_score: 0, flags: [], resources: ['lab'] }).data, SET);
+expect('ทารกระดับ 1 จาก SpO₂ 88 มีไข้ด้วย → P2 ต้องไม่ลดระดับ ยังเป็นระดับ 1',
+  infantLv1.level === 1);
+
+/* ------------------------- 3c) ข้อ P: firm ขอบอายุ อุณหภูมิที่ไม่ได้วัด คำเตือน P4 ฉบับโรงพยาบาล */
+function runCase(raw, set) { return E.assess(E.validate(raw).data, set || SET); }
+function codesOf(r) { return r.matched.map(function (m) { return m.code; }); }
+function infantData(extra) {
+  return Object.assign({ cc: 'ไข้', age_value: 2, age_unit: 'month', hr: 150, rr: 40, spo2: 99, sbp: 90, dbp: 55,
+                         gcs: 15, temp_c: 38.5, pain_score: 0, flags: [], resources: ['lab'] }, extra);
+}
+var neoD1 = runCase(infantData({ age_value: 0, hr: 190, resources: ['lab', 'xray'] }));
+expect('ทารก 0 เดือนไข้ 38.5 และเข้า D1 ด้วย → ระดับ 2 ตาม P1 ที่ให้อย่างน้อยระดับ 2 ไม่ขึ้นคำว่าพิจารณา',
+  neoD1.level === 2 && !neoD1.consider && neoD1.reason.indexOf('P1') !== -1);
+var m1 = runCase(infantData({ age_value: 1 }));
+expect('อายุ 1 เดือนพอดี ไข้ 38.5 → เข้า P2 ไม่เข้า P1',
+  codesOf(m1).indexOf('P2') !== -1 && codesOf(m1).indexOf('P1') === -1);
+var m3 = runCase(infantData({ age_value: 3 }));
+expect('อายุ 3 เดือนพอดี ไข้ 38.5 → พ้นช่วง P2 และไม่ถึงจุดตัด P3 → ระดับ 4',
+  m3.level === 4 && codesOf(m3).every(function (c) { return c.charAt(0) !== 'P'; }));
+var m36 = runCase(infantData({ age_value: 3, age_unit: 'year', hr: 120, rr: 30, sbp: 95, dbp: 60, temp_c: 39.5, resources: [] }));
+expect('อายุ 3 ปีพอดี ไข้ 39.5 → พ้นช่วง P3 ยังเป็นระดับ 5',
+  m36.level === 5 && codesOf(m36).every(function (c) { return c.charAt(0) !== 'P'; }) &&
+  m36.advisories.every(function (a) { return a.code !== 'P4'; }));
+var noTempD = runCase(infantData({ temp_c: '', resources: ['lab', 'xray'] }));
+expect('ทารกเว้นอุณหภูมิที่จุด ง → เหตุผลบอกว่ายังตัดสินไม่ได้ ไม่บอกว่าสัญญาณชีพไม่อยู่ในช่วงอันตราย',
+  noTempD.reason.indexOf('ตัดสินไม่ได้') !== -1 && noTempD.reason.indexOf('และสัญญาณชีพไม่อยู่ในช่วงอันตราย') === -1);
+var p4 = runCase(infantData({ age_value: 2, age_unit: 'year', hr: 120, rr: 30, sbp: 95, dbp: 60, temp_c: 39.0, resources: [] }));
+expect('เด็ก 2 ปีไข้ 39.0 → ขึ้นคำเตือน P4 เรื่องวัคซีนและไข้ไม่ทราบสาเหตุ โดยไม่เปลี่ยนระดับ',
+  p4.level === 5 && p4.advisories.some(function (x) { return x.code === 'P4'; }));
+var lv1NoTemp = runCase(infantData({ spo2: 88, temp_c: '' }));
+expect('เด็กระดับ 1 ไม่ได้วัดอุณหภูมิ → ข้อ P ไม่ถูกยกเป็นข้อที่ขวางการตัดสิน',
+  lv1NoTemp.level === 1 && !lv1NoTemp.blocking_unknown.some(function (x) { return x.dp === 'P'; }));
+['20', '20c'].forEach(function (id) {
+  var k = CASES.filter(function (c) { return String(c.id) === id; })[0];
+  var rk = runCase(k.data, SETS[k.set || 'moph-ed-triage-2561']);
+  expect('เคส ' + id + ' เข้า D1 ข้อเดียว ไม่มี D11 หรือข้อ P มาปน', JSON.stringify(codesOf(rk)) === '["D1"]');
+});
+var localNeo = runCase(infantData({ age_value: 0 }), SETS['moph-ed-triage-2561-local']);
+expect('ฉบับโรงพยาบาลยังมีข้อ P1 → ทารก 0 เดือนไข้ 38.5 ใช้ Lab อย่างเดียว ได้ระดับ 2',
+  localNeo.level === 2 && codesOf(localNeo).indexOf('P1') !== -1);
 
 /* ------------------------- 4) validate: ค่าขยะต้องไม่ไหลเข้า engine */
 var g1 = E.validate({ hr: 400, flags: [], resources: [] });

@@ -4,7 +4,8 @@
  * เพื่อไม่ให้ชุดทดสอบสองที่หลุดจากกัน
  *
  * ที่มาของเฉลย:
- *   [คู่มือ] = ตัวอย่างผู้ป่วยที่คู่มือ MOPH ED Triage 2561 เฉลยไว้เอง (หน้า 8–9, 11–12, 15)
+ *   [คู่มือ] = ตัวอย่างหรือกติกาที่คู่มือ MOPH ED Triage 2561 ระบุไว้ (หน้าเล่ม 5–6, 8–9, 12, 13)
+ *            บางเคสผู้พัฒนาเติมสัญญาณชีพให้ครบเอง · ช่องทาง ER/OPD เป็นกติกาหน้างาน ไม่ได้มาจากคู่มือ
  *   [ขอบ]   = เคสทดสอบขอบเกณฑ์ที่ผู้พัฒนา (แพทย์ EM) สร้างจากตัวเลขจุดตัดในคู่มือ
  * ทุกเคสเป็นสถานการณ์จำลอง ไม่ใช่ผู้ป่วยจริง
  * ========================================================================== */
@@ -77,7 +78,7 @@
               flags: [], resources: ['lab', 'us'] },
       expect: { level: 3, channel: 'OPD', codes: [] } },
 
-    /* ---------------- จุด ค — ตัวอย่างที่คู่มือเฉลยเอง (หน้า 15) ---------------- */
+    /* ---------------- จุด ค — ตัวอย่างที่คู่มือเฉลยเอง (หน้าเล่ม 12) ---------------- */
     { id: 12, src: 'คู่มือ', name: 'เด็ก 10 ปี คันไม่มีผื่น · ตรวจและสั่งยา · ไม่ใช้ทรัพยากร',
       data: { cc: 'คัน', age_value: 10, age_unit: 'year', sbp: 105, dbp: 65, hr: 90,
               rr: 18, spo2: 99, gcs: 15, pain_score: 0, flags: [], resources: ['hp'] },
@@ -129,28 +130,28 @@
 
     /* ---------------- จุด ง — danger zone แยกตามช่วงอายุ ---------------- */
     { id: 20, src: 'ขอบ', name: 'ทารก 2 เดือน ชีพจร 190 · ความดัน 95/55 (ไม่เข้าเกณฑ์ shock) → เข้า D1',
-      data: { cc: 'ไข้ ซึม', age_value: 2, age_unit: 'month', hr: 190, rr: 45, spo2: 97,
-              sbp: 95, dbp: 55, gcs: 15, temp_c: 38.5, pain_score: 0,
+      data: { cc: 'ซึม ดูดนมน้อย', age_value: 2, age_unit: 'month', hr: 190, rr: 45, spo2: 97,
+              sbp: 95, dbp: 55, gcs: 15, temp_c: 37.5, pain_score: 0,
               flags: [], resources: ['lab', 'xray'] },
       expect: { level: 2, channel: 'ER', codes: ['D1'] } },
 
     { id: '20b', src: 'ขอบ', name: '⚠️ ทารก 2 เดือน ความดัน 85/50 — คู่มือ MOPH ใช้ SBP < 90 เท่ากันทุกอายุ จึงออกมาเป็นระดับ 1',
       note: 'ความดันนี้ปกติสำหรับทารก แต่ต่ำกว่าจุดตัดผู้ใหญ่ในเล่ม — เครื่องมือแสดงตามที่คู่มือเขียน ไม่แก้ให้เอง เทียบกับเคส 20c',
-      data: { cc: 'ไข้ ซึม', age_value: 2, age_unit: 'month', hr: 190, rr: 45, spo2: 97,
-              sbp: 85, dbp: 50, gcs: 15, temp_c: 38.5, pain_score: 0,
+      data: { cc: 'ซึม ดูดนมน้อย', age_value: 2, age_unit: 'month', hr: 190, rr: 45, spo2: 97,
+              sbp: 85, dbp: 50, gcs: 15, temp_c: 37.5, pain_score: 0,
               flags: [], resources: ['lab', 'xray'] },
       expect: { level: 1, channel: 'ER', codes: ['A7'] } },
 
     { id: '20c', src: 'ขอบ', set: 'moph-ed-triage-2561-local',
       name: '✅ เคสเดียวกับ 20b แต่ใช้ชุดเกณฑ์ฉบับโรงพยาบาล (จุดตัด shock ตามอายุ = 70) → ไม่ใช่ shock → ระดับ 2 จาก D1',
       note: 'สลับไฟล์เกณฑ์อย่างเดียว คำตอบเปลี่ยน โดยไม่แก้โค้ดแม้บรรทัดเดียว',
-      data: { cc: 'ไข้ ซึม', age_value: 2, age_unit: 'month', hr: 190, rr: 45, spo2: 97,
-              sbp: 85, dbp: 50, gcs: 15, temp_c: 38.5, pain_score: 0,
+      data: { cc: 'ซึม ดูดนมน้อย', age_value: 2, age_unit: 'month', hr: 190, rr: 45, spo2: 97,
+              sbp: 85, dbp: 50, gcs: 15, temp_c: 37.5, pain_score: 0,
               flags: [], resources: ['lab', 'xray'] },
       expect: { level: 2, channel: 'ER', codes: ['D1'] } },
 
     { id: '20d', src: 'ขอบ', set: 'moph-ed-triage-2561-local',
-      name: 'ฉบับโรงพยาบาล: เด็ก 2 ปี ไข้ 38.6 °C → เข้า D11 (คู่มือ MOPH ไม่ได้ให้จุดตัดอุณหภูมิไว้)',
+      name: 'ฉบับโรงพยาบาล: เด็ก 2 ปี ไข้ 38.6 °C → เข้า D11 (PMK ใช้ > 38 °C · ข้อ P3 ของคู่มือ MOPH ใช้ > 39.0 °C จึงไม่เข้า)',
       data: { cc: 'ไข้', age_value: 2, age_unit: 'year', hr: 130, rr: 30, spo2: 98,
               sbp: 95, dbp: 60, gcs: 15, temp_c: 38.6, pain_score: 0,
               flags: [], resources: ['lab', 'xray'] },
@@ -191,7 +192,40 @@
       data: { cc: 'เหนื่อย', age_value: 58, age_unit: 'year', hr: 92, rr: 20, spo2: 92,
               sbp: 122, dbp: 76, gcs: 15, temp_c: 37, pain_score: 2,
               flags: [], resources: ['lab', 'xray'] },
-      expect: { level: 3, channel: 'OPD', codes: [] } }
+      expect: { level: 3, channel: 'OPD', codes: [] } },
+
+    /* ---------------- ข้อพิจารณาผู้ป่วยเด็ก — กรอบ Pediatric Triage หน้าเล่ม 13 ---------------- */
+    { id: 27, src: 'คู่มือ', name: 'ทารกอายุ 20 วัน ไข้ 38.5 °C ใช้ Lab อย่างเดียว → P1 อย่างน้อยระดับ 2',
+      note: 'แอปรับอายุเป็นเดือน อายุ 0 เดือนครอบ 0–30 วัน กว้างกว่าช่วง 1–28 วันในคู่มือ · ไม่มี P ข้อนี้ ระบบจะได้ระดับ 4 จากจุด ค',
+      data: { cc: 'ไข้', age_value: 0, age_unit: 'month', hr: 150, rr: 40, spo2: 99,
+              sbp: 90, dbp: 55, gcs: 15, temp_c: 38.5, pain_score: 0,
+              flags: [], resources: ['lab'] },
+      expect: { level: 2, channel: 'ER', codes: ['P1'] } },
+
+    { id: 28, src: 'คู่มือ', name: 'ทารก 2 เดือน ไข้ 38.5 °C ใช้ Lab อย่างเดียว → P2 พิจารณาระดับ 2',
+      data: { cc: 'ไข้', age_value: 2, age_unit: 'month', hr: 150, rr: 40, spo2: 99,
+              sbp: 90, dbp: 55, gcs: 15, temp_c: 38.5, pain_score: 0,
+              flags: [], resources: ['lab'] },
+      expect: { level: 2, channel: 'ER', codes: ['P2'] } },
+
+    { id: 29, src: 'ขอบ', name: 'ทารก 2 เดือน ไข้ 38.0 °C พอดี (เกณฑ์คือ > 38.0) → ไม่เข้า P2 → ระดับ 4',
+      data: { cc: 'ไข้', age_value: 2, age_unit: 'month', hr: 150, rr: 40, spo2: 99,
+              sbp: 90, dbp: 55, gcs: 15, temp_c: 38.0, pain_score: 0,
+              flags: [], resources: ['lab'] },
+      expect: { level: 4, channel: 'OPD', codes: [] } },
+
+    { id: 30, src: 'คู่มือ', name: 'เด็ก 2 ปี ไข้ 39.5 °C ไม่ใช้ทรัพยากร → P3 พิจารณาระดับ 3',
+      note: 'ระบบตรวจเฉพาะอายุกับอุณหภูมิ ข้อวัคซีนไม่ครบและไข้ไม่ทราบสาเหตุขึ้นเป็นคำเตือน P4 ให้พยาบาลพิจารณา',
+      data: { cc: 'ไข้', age_value: 2, age_unit: 'year', hr: 120, rr: 30, spo2: 98,
+              sbp: 95, dbp: 60, gcs: 15, temp_c: 39.5, pain_score: 0,
+              flags: [], resources: [] },
+      expect: { level: 3, channel: 'OPD', codes: ['P3'] } },
+
+    { id: 31, src: 'ขอบ', name: 'เด็ก 2 ปี ไข้ 39.0 °C พอดี (เกณฑ์คือ > 39.0) → ไม่เข้า P3 → ระดับ 5 พร้อมคำเตือน P4',
+      data: { cc: 'ไข้', age_value: 2, age_unit: 'year', hr: 120, rr: 30, spo2: 98,
+              sbp: 95, dbp: 60, gcs: 15, temp_c: 39.0, pain_score: 0,
+              flags: [], resources: [] },
+      expect: { level: 5, channel: 'OPD', codes: [] } }
   ];
 
   if (typeof module !== 'undefined' && module.exports) module.exports = CASES;

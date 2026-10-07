@@ -60,7 +60,7 @@
 
   /* ----------------------------------------------------------- นับทรัพยากร
    * นับเฉพาะกิจกรรมที่อยู่ในรายการ "กิจกรรมที่นับ" ของชุดเกณฑ์ —
-   * ติ๊กของในรายการ "ไม่นับ" กี่อย่างก็ไม่เพิ่มจำนวน (คู่มือหน้า 13–14)   */
+   * ติ๊กของในรายการ "ไม่นับ" กี่อย่างก็ไม่เพิ่มจำนวน (คู่มือหน้า 10–11)   */
   function countResources(picked, set) {
     var counted = ((set.resources || {}).counted || []).map(function (r) { return r.id; });
     var seen = {}, n = 0;
@@ -75,7 +75,8 @@
    * ก (A): ต้องการ life-saving intervention? → ระดับ 1
    * ข (B): รอได้ไหม — ภาวะเสี่ยง / ภาวะซึม / ภาวะปวด → ระดับ 2
    * ค (C): ใช้ทรัพยากรกี่อย่าง → 0 = ระดับ 5 · 1 = ระดับ 4 · ≥2 = ไปจุด ง
-   * ง (D): สัญญาณชีพช่วงอันตรายตามช่วงอายุ → เข้า = พิจารณาระดับ 2 · ไม่เข้า = 3 */
+   * ง (D): สัญญาณชีพช่วงอันตรายตามช่วงอายุ → เข้า = พิจารณาระดับ 2 · ไม่เข้า = 3
+   * P: ข้อพิจารณาผู้ป่วยเด็ก (กรอบ Pediatric Triage หน้า 13) ใช้หลังเดินครบ ดันระดับขึ้นได้อย่างเดียว */
   function assess(data, set) {
     if (!set || !set.criteria) throw new Error('assess() ต้องได้รับชุดเกณฑ์');
     var crit = set.criteria, matched = [], unmatched = [], unknown = [], advisories = [];
@@ -86,6 +87,7 @@
                   page: c.page || null, danger_zone: !!c.danger_zone,
                   nurse_judgment: !!c.nurse_judgment, advisory_only: !!c.advisory_only,
                   note: c.note || '', local_addition: !!c.local_addition, source: c.source || '',
+                  min_level: c.min_level || null, firm: !!c.firm,
                   observed: describe(c.test, data) };
       var r = evalTest(c.test, data);
       if (r === true) { (c.advisory_only ? advisories : matched).push(row); }
@@ -124,15 +126,36 @@
           out.reason = 'จุด ง — ใช้ทรัพยากร ≥ 2 อย่าง และสัญญาณชีพอยู่ในช่วงอันตราย → พิจารณายกเป็นระดับ 2';
         } else {
           out.level = 3;
-          out.reason = 'จุด ง — ใช้ทรัพยากร ≥ 2 อย่าง และสัญญาณชีพไม่อยู่ในช่วงอันตราย';
+          /* ข้อ D หรืออุณหภูมิเด็กข้อ P ที่ยังไม่ได้วัด ห้ามสรุปว่าสัญญาณชีพไม่อยู่ในช่วงอันตราย */
+          var unkD = unknown.filter(function (u) { return u.dp === 'D' || (u.dp === 'P' && !u.advisory_only); }).length;
+          out.reason = unkD
+            ? 'จุด ง — ใช้ทรัพยากร ≥ 2 อย่าง สัญญาณชีพที่วัดแล้วไม่อยู่ในช่วงอันตราย แต่ยังตัดสินไม่ได้ ' + unkD + ' ข้อ'
+            : 'จุด ง — ใช้ทรัพยากร ≥ 2 อย่าง และสัญญาณชีพไม่อยู่ในช่วงอันตราย';
         }
       }
     }
 
+    /* ข้อพิจารณาผู้ป่วยเด็ก: ระดับขั้นต่ำตามอุณหภูมิและอายุ ใช้ได้ทุกจุด ดันขึ้นได้อย่างเดียว ไม่ลด */
+    matched.filter(function (m) { return m.dp === 'P' && m.min_level; }).forEach(function (p) {
+      if (p.min_level < out.level) {
+        out.level = p.min_level;
+        out.consider = !p.firm;
+        out.reason += ' · ' + p.code + ' ข้อพิจารณาผู้ป่วยเด็ก → ' + (p.firm ? 'อย่างน้อยระดับ ' : 'พิจารณาระดับ ') + p.min_level;
+      } else if (p.firm && p.min_level === out.level) {
+        /* คู่มือเขียนว่า "เป็นอย่างน้อย" ระดับนี้จึงไม่ใช่แค่ข้อให้พิจารณา */
+        out.consider = false;
+        out.reason += ' · ' + p.code + ' ข้อพิจารณาผู้ป่วยเด็ก → อย่างน้อยระดับ ' + p.min_level;
+      }
+    });
+
     out.channel = out.level <= 2 ? 'ER' : 'OPD';
     /* ข้อที่ตัดสินไม่ได้ ณ จุดที่ยังไม่ถูกข้าม = ต้องเตือนพยาบาล ไม่กลืนเงียบ */
     var order = ['A', 'B', 'C', 'D'], stopIdx = order.indexOf(out.stopped_at);
-    out.blocking_unknown = unknown.filter(function (u) { return order.indexOf(u.dp) <= stopIdx; });
+    out.blocking_unknown = unknown.filter(function (u) {
+      /* ข้อ P ขวางการตัดสินเฉพาะเมื่อยังดันระดับขึ้นได้ */
+      if (u.dp === 'P') return !u.advisory_only && !!u.min_level && u.min_level < out.level;
+      return order.indexOf(u.dp) <= stopIdx;
+    });
     return out;
   }
 
