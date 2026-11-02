@@ -113,6 +113,7 @@ node gen-criteria-js.js      # รันใหม่ทุกครั้งท�
 | วิชา 6 | ✅ Ethics Impact Assessment · Security audit · Privacy policy + แบบขอความยินยอม [`privacy-policy-consent-v1.0.pdf`](privacy-policy-consent-v1.0.pdf) |
 | วิชา 7 | ✅ เวอร์ชัน 1.2.1: แบบขอความยินยอมในแอป · แก้ตามผลตรวจ Codex รอบ 3 · เลขเวอร์ชัน · เอกสาร [PRODUCTION-PLAN](PRODUCTION-PLAN.md) · [DEVLOG](DEVLOG.md) · [W7-CHECKLIST](W7-CHECKLIST.md) |
 | Demo Day 1.3.0 (7 ต.ค.) | ✅ ข้อพิจารณาผู้ป่วยเด็ก P1–P3 · เหตุผลเมื่อข้อมูลไม่ครบ · เลขหน้าเล่ม · ดู [DEVLOG](DEVLOG.md) |
+| 1.3.1 (2 พ.ย.) | ✅ ช่องตัวเลขไม่เปลี่ยนค่าตามล้อเมาส์ · ดู [DEVLOG](DEVLOG.md) |
 | หลัง Demo Day | UAT กับพยาบาลคัดกรอง ≥ 3 คน — วัดเวลาต่อราย และอัตรา/เหตุผลการ override |
 
 ## Backend (วิชา 5 Part 2)

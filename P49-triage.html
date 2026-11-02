@@ -104,7 +104,7 @@
 <header>
   <h1>ผู้ช่วยคัดกรองช่องทาง ER/OPD</h1>
   <p>เสนอระดับความเร่งด่วนและช่องทาง พร้อมแสดง<b>ข้อเกณฑ์ที่เข้าเป็นรายข้อ</b> · พยาบาลเป็นผู้ตัดสินสุดท้ายเสมอ<br>
-     นพ.กิตติพศ เกียรติพัฒนาชัย (P49) · <b>เวอร์ชัน 1.3.0</b> · <a href="./#versions">ประวัติเวอร์ชัน</a></p>
+     นพ.กิตติพศ เกียรติพัฒนาชัย (P49) · <b>เวอร์ชัน 1.3.1</b> · <a href="./#versions">ประวัติเวอร์ชัน</a></p>
 </header>
 
 <div class="tabs" role="tablist">
@@ -290,7 +290,7 @@
 
 <p class="disc" style="text-align:center">
   เครื่องมือสาธิตเพื่อการเรียนการสอน ใช้ข้อมูลจำลองทั้งหมด · ไม่ใช่เครื่องมือแพทย์
-  และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · เวอร์ชัน 1.3.0 (7 ต.ค. 2569)
+  และไม่ทดแทนการตัดสินใจของผู้คัดกรอง · เวอร์ชัน 1.3.1 (2 พ.ย. 2569)
 </p>
 </div>
 
@@ -885,6 +885,12 @@ function openEdit(x){
   $('ed-cancel').addEventListener('click', function(){ box.hidden = true; });
   box.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
+
+/* ช่องตัวเลขที่โฟกัสอยู่เปลี่ยนค่าตามล้อเมาส์เมื่อเคอร์เซอร์อยู่บนช่อง ชีพจร 104 เคยกลายเป็น 99 โดยหน้าไม่เลื่อน
+   ออกจากช่องก่อน ค่าจึงคงเดิมและหน้าเลื่อนตามปกติ · ตรวจด้วย Playwright บน Chrome ยังไม่ได้ลอง Safari */
+document.addEventListener('wheel', function(e){
+  if (e.target === document.activeElement && e.target.type === 'number') e.target.blur();
+}, { capture: true, passive: true });
 
 /* ---------------------------------------------------------------- เริ่ม */
 renderSetPicker(); renderFlags(); renderResources(); renderCriteria(); initDb();
